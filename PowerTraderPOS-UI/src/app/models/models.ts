@@ -423,3 +423,145 @@ export interface UpdateOrganisationDto {
   description?: string;
   isActive?: boolean;
 }
+
+// Account Group Master
+export interface AccountGroupMaster {
+  under: number;
+  primaryGroup?: string;
+  accountType?: string;
+  groupName?: string;
+  nature?: string;
+  comments?: string;
+  superId?: number;
+  branchcode?: string;
+  accountStatus?: string;
+  isStatus?: string;
+  bsStatus?: string;
+  cfStatus?: string;
+  reStatus?: string;
+  organisationName?: string;
+  organisationCode?: string;
+  branchName?: string;
+}
+
+export interface CreateAccountGroupMasterDto {
+  primaryGroup: string;
+  accountType: string;
+  groupName: string;
+  nature: string;
+  superId?: number;
+  comments?: string;
+}
+
+export interface UpdateAccountGroupMasterDto {
+  primaryGroup?: string;
+  accountType?: string;
+  groupName?: string;
+  nature?: string;
+  superId?: number;
+  comments?: string;
+  accountStatus?: string;
+}
+
+// Account Creation (enhanced)
+export interface AccountCreationEnhanced {
+  sNo: number;
+  accountGroup?: string;
+  accountName?: string;
+  accountnr?: string;
+  contactPerson?: string;
+  physicalAddress?: string;
+  postalAddress?: string;
+  phone?: string;
+  fax?: string;
+  email?: string;
+  dated?: Date;
+  status?: string;
+  openingBalance?: number;
+  obNature?: string;
+  creditLimit?: number;
+  comments?: string;
+  superGroup?: string;
+  under?: string;
+  closingBalance?: number;
+  cbNature?: string;
+  branchcode?: string;
+  entryId?: string;
+  entryDate?: string;
+}
+
+export interface CreateAccountCreationEnhancedDto {
+  accountGroup: string;
+  accountName: string;
+  accountnr: string;
+  openingBalance?: number;
+  obNature?: string;
+  contactPerson?: string;
+  phone?: string;
+  email?: string;
+}
+
+export interface UpdateAccountCreationEnhancedDto {
+  accountGroup?: string;
+  accountName?: string;
+  contactPerson?: string;
+  physicalAddress?: string;
+  postalAddress?: string;
+  phone?: string;
+  fax?: string;
+  email?: string;
+  status?: string;
+  creditLimit?: number;
+  comments?: string;
+}
+
+// Account Ledger
+export interface AccountLedger {
+  refno: number;
+  transDate?: Date;
+  department?: string;
+  voucherType?: string;
+  accountNr?: string;
+  accountName?: string;
+  debit?: number;
+  credit?: number;
+  balance?: number;
+  accountingStatus?: string;
+  nature?: string;
+  narration?: string;
+  voucherNr?: string;
+  accountGroup?: string;
+  entryID?: string;
+  month?: string;
+  year?: number;
+  accountType?: string;
+  accountStatus?: string;
+  isStatus?: string;
+  bsStatus?: string;
+  cfStatus?: string;
+  reStatus?: string;
+  organisationCode?: string;
+  organisationName?: string;
+  branchcode?: string;
+  branchName?: string;
+}
+
+export interface CreateAccountLedgerDto {
+  transDate: Date;
+  accountNr: string;
+  accountName: string;
+  voucherType: string;
+  voucherNr: string;
+  debit: number;
+  credit: number;
+  narration?: string;
+  department?: string;
+}
+
+export interface UpdateAccountLedgerDto {
+  transDate?: Date;
+  debit?: number;
+  credit?: number;
+  narration?: string;
+  accountingStatus?: string;
+}
