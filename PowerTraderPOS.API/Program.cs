@@ -17,6 +17,11 @@ builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<ISupplierService, SupplierService>();
 builder.Services.AddScoped<IStaffService, StaffService>();
+builder.Services.AddScoped<ISalesDetailsService, SalesDetailsService>();
+builder.Services.AddScoped<IStockMasterService, StockMasterService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<IBranchService, BranchService>();
+builder.Services.AddScoped<IAttendanceService, AttendanceService>();
 
 // Add JWT Authentication
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
