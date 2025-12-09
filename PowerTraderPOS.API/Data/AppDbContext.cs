@@ -6,6 +6,7 @@ using TablesCustomerInfo = PowerTraderPOS.API.Models.Tables.CustomerInfo;
 using TablesSuppliers = PowerTraderPOS.API.Models.Tables.Suppliers;
 using TablesSalesDetails = PowerTraderPOS.API.Models.Tables.SalesDetails;
 using TablesStaffInformation = PowerTraderPOS.API.Models.Tables.StaffInformation;
+using PowerTraderPOS.API.Models.Tables;
 
 namespace PowerTraderPOS.API.Data
 {
@@ -42,6 +43,10 @@ namespace PowerTraderPOS.API.Data
         public DbSet<TblServicing> TblServicing { get; set; }
         public DbSet<OrganisationInformation> OrganisationInformation { get; set; }
         public DbSet<WarehouseTbl> WarehouseTbl { get; set; }
+
+        // Retail Sales Point Tables (Phase 1A: Gift Cards)
+        public DbSet<SalesDetailsGifts> SalesDetailsGifts { get; set; }
+        public DbSet<GiftCards> GiftCards { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
