@@ -440,5 +440,229 @@ namespace PowerTraderPOS.API.Services
                 _ => "Cash"
             };
         }
+
+        public async Task<ProfitAndLossReportDto> GetProfitAndLossReportAsync(DateTime fromDate, DateTime toDate)
+        {
+            var (orgCode, branchCode, _, isAdmin) = await GetUserContextAsync();
+
+            var query = _context.AccountsLedger
+                .Where(e => e.TransactionDate >= fromDate && e.TransactionDate <= toDate);
+
+            // Multi-tenant filtering
+            query = isAdmin
+                ? query.Where(e => e.OrganisationCode == orgCode)
+                : query.Where(e => e.OrganisationCode == orgCode && e.Branchcode == branchCode);
+
+            var entries = await query.ToListAsync();
+
+            // Revenue breakdown
+            var revenueCategories = entries
+                .Where(e => e.AccountType == "Revenue")
+                .GroupBy(e => new { e.AccountCode, e.AccountName })
+                .Select(g => new
+                {
+                    g.Key.AccountCode,
+                    g.Key.AccountName,
+                    Amount = g.Sum(e => e.CreditAmount - e.DebitAmount)
+                })
+                .ToList();
+
+            var totalRevenue = revenueCategories.Sum(r => r.Amount);
+
+            var revenueByCategory = revenueCategories.Select(r => new AccountCategoryDto
+            {
+                AccountCode = r.AccountCode,
+                AccountName = r.AccountName,
+                Amount = r.Amount,
+                Percentage = totalRevenue > 0 ? (r.Amount / totalRevenue) * 100 : 0
+            }).ToList();
+
+            // Expense breakdown
+            var expenseCategories = entries
+                .Where(e => e.AccountType == "Expense")
+                .GroupBy(e => new { e.AccountCode, e.AccountName })
+                .Select(g => new
+                {
+                    g.Key.AccountCode,
+                    g.Key.AccountName,
+                    Amount = g.Sum(e => e.DebitAmount - e.CreditAmount)
+                })
+                .ToList();
+
+            var totalExpenses = expenseCategories.Sum(e => e.Amount);
+
+            var expensesByCategory = expenseCategories.Select(e => new AccountCategoryDto
+            {
+                AccountCode = e.AccountCode,
+                AccountName = e.AccountName,
+                Amount = e.Amount,
+                Percentage = totalRevenue > 0 ? (e.Amount / totalRevenue) * 100 : 0
+            }).ToList();
+
+            // Calculate gross profit (revenue - COGS)
+            var cogs = expenseCategories
+                .Where(e => e.AccountCode == "EXP001") // COGS account
+                .Sum(e => e.Amount);
+            var grossProfit = totalRevenue - cogs;
+
+            return new ProfitAndLossReportDto
+            {
+                FromDate = fromDate,
+                ToDate = toDate,
+                RevenueByCategory = revenueByCategory,
+                TotalRevenue = totalRevenue,
+                ExpensesByCategory = expensesByCategory,
+                TotalExpenses = totalExpenses,
+                GrossProfit = grossProfit
+            };
+        }
+
+        public async Task<CashFlowStatementDto> GetCashFlowStatementAsync(DateTime fromDate, DateTime toDate)
+        {
+            var (orgCode, branchCode, _, isAdmin) = await GetUserContextAsync();
+
+            var query = _context.AccountsLedger
+                .Where(e => e.TransactionDate >= fromDate && e.TransactionDate <= toDate);
+
+            // Multi-tenant filtering
+            query = isAdmin
+                ? query.Where(e => e.OrganisationCode == orgCode)
+                : query.Where(e => e.OrganisationCode == orgCode && e.Branchcode == branchCode);
+
+            var entries = await query.ToListAsync();
+
+            // Cash from sales (revenue entries to cash accounts)
+            var cashFromSales = entries
+                .Where(e => e.AccountCode == "AST001" && e.DebitAmount > 0 && e.Description != null && e.Description.Contains("Return"))
+                .Sum(e => e.DebitAmount);
+
+            // Cash from gift cards (gift card redemptions)
+            var cashFromGiftCards = entries
+                .Where(e => e.ReferenceNumber != null && e.ReferenceNumber.StartsWith("GC"))
+                .Sum(e => e.CreditAmount);
+
+            // Cash paid for inventory (COGS)
+            var cashPaidForInventory = entries
+                .Where(e => e.AccountCode == "EXP001") // COGS
+                .Sum(e => e.DebitAmount);
+
+            // Cash paid for other expenses (excluding COGS)
+            var cashPaidForExpenses = entries
+                .Where(e => e.AccountType == "Expense" && e.AccountCode != "EXP001")
+                .Sum(e => e.DebitAmount - e.CreditAmount);
+
+            // Get opening balance (before period)
+            var openingBalanceQuery = _context.AccountsLedger
+                .Where(e => e.TransactionDate < fromDate && e.AccountCode == "AST001");
+
+            openingBalanceQuery = isAdmin
+                ? openingBalanceQuery.Where(e => e.OrganisationCode == orgCode)
+                : openingBalanceQuery.Where(e => e.OrganisationCode == orgCode && e.Branchcode == branchCode);
+
+            var openingDebits = await openingBalanceQuery.SumAsync(e => e.DebitAmount);
+            var openingCredits = await openingBalanceQuery.SumAsync(e => e.CreditAmount);
+            var openingCashBalance = openingDebits - openingCredits;
+
+            // Get closing balance (end of period)
+            var closingBalanceQuery = _context.AccountsLedger
+                .Where(e => e.TransactionDate <= toDate && e.AccountCode == "AST001");
+
+            closingBalanceQuery = isAdmin
+                ? closingBalanceQuery.Where(e => e.OrganisationCode == orgCode)
+                : closingBalanceQuery.Where(e => e.OrganisationCode == orgCode && e.Branchcode == branchCode);
+
+            var closingDebits = await closingBalanceQuery.SumAsync(e => e.DebitAmount);
+            var closingCredits = await closingBalanceQuery.SumAsync(e => e.CreditAmount);
+            var closingCashBalance = closingDebits - closingCredits;
+
+            return new CashFlowStatementDto
+            {
+                FromDate = fromDate,
+                ToDate = toDate,
+                CashFromSales = cashFromSales,
+                CashFromGiftCards = cashFromGiftCards,
+                CashPaidForInventory = cashPaidForInventory,
+                CashPaidForExpenses = cashPaidForExpenses,
+                OpeningCashBalance = openingCashBalance,
+                ClosingCashBalance = closingCashBalance
+            };
+        }
+
+        public async Task<SalesAnalyticsReportDto> GetSalesAnalyticsReportAsync(DateTime fromDate, DateTime toDate)
+        {
+            var (orgCode, branchCode, _, isAdmin) = await GetUserContextAsync();
+
+            // Get ledger entries for the period
+            var ledgerQuery = _context.AccountsLedger
+                .Where(e => e.TransactionDate >= fromDate && e.TransactionDate <= toDate);
+
+            ledgerQuery = isAdmin
+                ? ledgerQuery.Where(e => e.OrganisationCode == orgCode)
+                : ledgerQuery.Where(e => e.OrganisationCode == orgCode && e.Branchcode == branchCode);
+
+            var ledgerEntries = await ledgerQuery.ToListAsync();
+
+            // Sales metrics (revenue entries excluding returns)
+            var salesEntries = ledgerEntries
+                .Where(e => e.AccountCode == "REV001" && e.CreditAmount > 0)
+                .ToList();
+
+            var totalTransactions = salesEntries.Count;
+            var totalSalesAmount = salesEntries.Sum(e => e.CreditAmount);
+
+            // Returns metrics
+            var returnEntries = ledgerEntries
+                .Where(e => e.AccountCode == "REV002" && e.DebitAmount > 0)
+                .ToList();
+
+            var totalReturns = returnEntries.Count;
+            var totalReturnsAmount = returnEntries.Sum(e => e.DebitAmount);
+
+            // Gift card metrics - need to query actual gift card tables
+            var giftCardQuery = _context.GiftCards
+                .Where(g => g.IssueDate >= fromDate && g.IssueDate <= toDate);
+
+            giftCardQuery = isAdmin
+                ? giftCardQuery.Where(g => g.OrganisationCode == orgCode)
+                : giftCardQuery.Where(g => g.OrganisationCode == orgCode && g.Branchcode == branchCode);
+
+            var giftCards = await giftCardQuery.ToListAsync();
+
+            var giftCardsIssued = giftCards.Count;
+            var giftCardsIssuedAmount = giftCards.Sum(g => g.InitialBalance);
+
+            // Redeemed gift cards (status = Redeemed or balance reduced)
+            var giftCardsRedeemed = giftCards.Count(g => g.Status == "Redeemed");
+            var giftCardsRedeemedAmount = giftCards
+                .Where(g => g.Status == "Redeemed")
+                .Sum(g => g.InitialBalance - g.CurrentBalance);
+
+            // Daily sales breakdown
+            var dailySales = salesEntries
+                .GroupBy(e => e.TransactionDate.Date)
+                .Select(g => new DailySalesDto
+                {
+                    Date = g.Key,
+                    SalesAmount = g.Sum(e => e.CreditAmount),
+                    TransactionCount = g.Count()
+                })
+                .OrderBy(d => d.Date)
+                .ToList();
+
+            return new SalesAnalyticsReportDto
+            {
+                FromDate = fromDate,
+                ToDate = toDate,
+                TotalTransactions = totalTransactions,
+                TotalSalesAmount = totalSalesAmount,
+                TotalReturns = totalReturns,
+                TotalReturnsAmount = totalReturnsAmount,
+                GiftCardsIssued = giftCardsIssued,
+                GiftCardsIssuedAmount = giftCardsIssuedAmount,
+                GiftCardsRedeemed = giftCardsRedeemed,
+                GiftCardsRedeemedAmount = giftCardsRedeemedAmount,
+                DailySales = dailySales
+            };
+        }
     }
 }

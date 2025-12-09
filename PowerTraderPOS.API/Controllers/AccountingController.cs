@@ -191,5 +191,65 @@ namespace PowerTraderPOS.API.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
+        /// <summary>
+        /// Generate detailed profit & loss report with category breakdown
+        /// </summary>
+        [HttpGet("profit-loss-report")]
+        [Authorize(Roles = "Admin,Finance")]
+        public async Task<ActionResult<ProfitAndLossReportDto>> GetProfitAndLossReport(
+            [FromQuery] DateTime from,
+            [FromQuery] DateTime to)
+        {
+            try
+            {
+                var report = await _accountingService.GetProfitAndLossReportAsync(from, to);
+                return Ok(report);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Generate cash flow statement
+        /// </summary>
+        [HttpGet("cash-flow-statement")]
+        [Authorize(Roles = "Admin,Finance")]
+        public async Task<ActionResult<CashFlowStatementDto>> GetCashFlowStatement(
+            [FromQuery] DateTime from,
+            [FromQuery] DateTime to)
+        {
+            try
+            {
+                var report = await _accountingService.GetCashFlowStatementAsync(from, to);
+                return Ok(report);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Generate sales analytics report
+        /// </summary>
+        [HttpGet("sales-analytics")]
+        [Authorize(Roles = "Admin,Finance,Sales")]
+        public async Task<ActionResult<SalesAnalyticsReportDto>> GetSalesAnalytics(
+            [FromQuery] DateTime from,
+            [FromQuery] DateTime to)
+        {
+            try
+            {
+                var report = await _accountingService.GetSalesAnalyticsReportAsync(from, to);
+                return Ok(report);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
     }
 }

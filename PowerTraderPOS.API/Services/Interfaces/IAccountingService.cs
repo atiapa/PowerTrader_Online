@@ -55,5 +55,20 @@ namespace PowerTraderPOS.API.Services.Interfaces
         /// Delete ledger entry (Admin only, with caution)
         /// </summary>
         Task<bool> DeleteLedgerEntryAsync(int ledgerId);
+
+        /// <summary>
+        /// Generate detailed profit & loss report with category breakdown
+        /// </summary>
+        Task<ProfitAndLossReportDto> GetProfitAndLossReportAsync(DateTime fromDate, DateTime toDate);
+
+        /// <summary>
+        /// Generate cash flow statement
+        /// </summary>
+        Task<CashFlowStatementDto> GetCashFlowStatementAsync(DateTime fromDate, DateTime toDate);
+
+        /// <summary>
+        /// Generate sales analytics report
+        /// </summary>
+        Task<SalesAnalyticsReportDto> GetSalesAnalyticsReportAsync(DateTime fromDate, DateTime toDate);
     }
 }

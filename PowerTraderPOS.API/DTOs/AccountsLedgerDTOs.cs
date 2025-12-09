@@ -125,4 +125,96 @@ namespace PowerTraderPOS.API.DTOs
         public decimal TotalLiabilities { get; set; }
         public decimal TotalEquity { get; set; }
     }
+
+    /// <summary>
+    /// DTO for detailed profit & loss report with category breakdown
+    /// </summary>
+    public class ProfitAndLossReportDto
+    {
+        public DateTime FromDate { get; set; }
+        public DateTime ToDate { get; set; }
+
+        // Revenue breakdown
+        public List<AccountCategoryDto> RevenueByCategory { get; set; } = new();
+        public decimal TotalRevenue { get; set; }
+
+        // Expense breakdown
+        public List<AccountCategoryDto> ExpensesByCategory { get; set; } = new();
+        public decimal TotalExpenses { get; set; }
+
+        // Profitability
+        public decimal GrossProfit { get; set; }
+        public decimal NetProfit => TotalRevenue - TotalExpenses;
+        public decimal ProfitMargin => TotalRevenue > 0 ? (NetProfit / TotalRevenue) * 100 : 0;
+    }
+
+    /// <summary>
+    /// DTO for account category in reports
+    /// </summary>
+    public class AccountCategoryDto
+    {
+        public string AccountCode { get; set; } = string.Empty;
+        public string AccountName { get; set; } = string.Empty;
+        public decimal Amount { get; set; }
+        public decimal Percentage { get; set; }
+    }
+
+    /// <summary>
+    /// DTO for cash flow statement
+    /// </summary>
+    public class CashFlowStatementDto
+    {
+        public DateTime FromDate { get; set; }
+        public DateTime ToDate { get; set; }
+
+        // Operating Activities
+        public decimal CashFromSales { get; set; }
+        public decimal CashFromGiftCards { get; set; }
+        public decimal CashPaidForInventory { get; set; }
+        public decimal CashPaidForExpenses { get; set; }
+        public decimal NetCashFromOperatingActivities => CashFromSales + CashFromGiftCards - CashPaidForInventory - CashPaidForExpenses;
+
+        // Cash balances
+        public decimal OpeningCashBalance { get; set; }
+        public decimal ClosingCashBalance { get; set; }
+        public decimal NetCashChange => ClosingCashBalance - OpeningCashBalance;
+    }
+
+    /// <summary>
+    /// DTO for sales analytics report
+    /// </summary>
+    public class SalesAnalyticsReportDto
+    {
+        public DateTime FromDate { get; set; }
+        public DateTime ToDate { get; set; }
+
+        // Sales metrics
+        public int TotalTransactions { get; set; }
+        public decimal TotalSalesAmount { get; set; }
+        public decimal AverageTransactionValue => TotalTransactions > 0 ? TotalSalesAmount / TotalTransactions : 0;
+
+        // Returns metrics
+        public int TotalReturns { get; set; }
+        public decimal TotalReturnsAmount { get; set; }
+        public decimal ReturnRate => TotalTransactions > 0 ? ((decimal)TotalReturns / TotalTransactions) * 100 : 0;
+
+        // Gift card metrics
+        public int GiftCardsIssued { get; set; }
+        public decimal GiftCardsIssuedAmount { get; set; }
+        public int GiftCardsRedeemed { get; set; }
+        public decimal GiftCardsRedeemedAmount { get; set; }
+
+        // Daily breakdown
+        public List<DailySalesDto> DailySales { get; set; } = new();
+    }
+
+    /// <summary>
+    /// DTO for daily sales data
+    /// </summary>
+    public class DailySalesDto
+    {
+        public DateTime Date { get; set; }
+        public decimal SalesAmount { get; set; }
+        public int TransactionCount { get; set; }
+    }
 }
