@@ -9,27 +9,8 @@ import { AuthService } from '../../services/auth.service';
   selector: 'app-suppliers-dashboard',
   standalone: true,
   imports: [CommonModule, MatCardModule, MatButtonModule, MatToolbarModule],
-  template: `
-    <mat-toolbar color="primary">
-      <span>Suppliers Dashboard - {{currentUser?.fullName}}</span>
-      <span class="spacer"></span>
-      <button mat-raised-button color="accent" (click)="logout()">Logout</button>
-    </mat-toolbar>
-    <div class="dashboard-container">
-      <h1>Suppliers Dashboard</h1>
-      <div class="dashboard-grid">
-        <mat-card><mat-card-header><mat-card-title>Supplier Management</mat-card-title></mat-card-header>
-        <mat-card-content><p>Manage supplier information</p></mat-card-content></mat-card>
-        <mat-card><mat-card-header><mat-card-title>Purchase Orders</mat-card-title></mat-card-header>
-        <mat-card-content><p>Create and track POs</p></mat-card-content></mat-card>
-        <mat-card><mat-card-header><mat-card-title>Invoices</mat-card-title></mat-card-header>
-        <mat-card-content><p>Process supplier invoices</p></mat-card-content></mat-card>
-        <mat-card><mat-card-header><mat-card-title>Payments</mat-card-title></mat-card-header>
-        <mat-card-content><p>Track supplier payments</p></mat-card-content></mat-card>
-      </div>
-    </div>
-  `,
-  styles: [`.spacer { flex: 1 1 auto; } .dashboard-container { padding: 20px; } .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px; } mat-card { cursor: pointer; transition: transform 0.2s; } mat-card:hover { transform: translateY(-5px); box-shadow: 0 8px 16px rgba(0,0,0,0.2); }`]
+  templateUrl: './suppliers-dashboard.component.html',
+  styleUrl: './suppliers-dashboard.component.scss'
 })
 export class SuppliersDashboardComponent {
   constructor(private authService: AuthService) {}
