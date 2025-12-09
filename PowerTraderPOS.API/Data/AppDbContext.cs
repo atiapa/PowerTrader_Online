@@ -44,9 +44,13 @@ namespace PowerTraderPOS.API.Data
         public DbSet<OrganisationInformation> OrganisationInformation { get; set; }
         public DbSet<WarehouseTbl> WarehouseTbl { get; set; }
 
-        // Retail Sales Point Tables (Phase 1A: Gift Cards)
+        // Retail Sales Point Tables
+        // Phase 1A: Gift Cards
         public DbSet<SalesDetailsGifts> SalesDetailsGifts { get; set; }
         public DbSet<GiftCards> GiftCards { get; set; }
+        
+        // Phase 1B: Inventory Management
+        public DbSet<RetailItems> RetailItems { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

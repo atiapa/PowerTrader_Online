@@ -29,8 +29,11 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IBranchService, BranchService>();
 builder.Services.AddScoped<IAttendanceService, AttendanceService>();
 
-// Register Retail Sales Point Services (Phase 1A: Gift Cards)
+// Register Retail Sales Point Services
+// Phase 1A: Gift Cards
 builder.Services.AddScoped<IGiftCardService, GiftCardService>();
+// Phase 1B: Inventory Management
+builder.Services.AddScoped<IInventoryService, InventoryService>();
 
 // Add JWT Authentication
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
