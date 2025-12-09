@@ -227,3 +227,199 @@ export interface UpdateAtcDto {
   eaDate?: Date;
   aaDate?: Date;
 }
+
+// Open Balance Model
+export interface OpenBalance {
+  refno: number;
+  date?: Date;
+  accountNr?: string;
+  accountType?: string;
+  accountName?: string;
+  debit?: number;
+  credit?: number;
+  narrations?: string;
+  entryID?: string;
+  branchcode?: string;
+  organisationName?: string;
+  organisationCode?: string;
+  branchName?: string;
+}
+
+export interface CreateOpenBalanceDto {
+  date: Date;
+  accountNr: string;
+  accountType: string;
+  accountName: string;
+  debit?: number;
+  credit?: number;
+  narrations?: string;
+}
+
+export interface UpdateOpenBalanceDto {
+  date?: Date;
+  accountType?: string;
+  accountName?: string;
+  debit?: number;
+  credit?: number;
+  narrations?: string;
+}
+
+// Order Reversed Model
+export interface OrderReversed {
+  refno: number;
+  invoicenr?: string;
+  productID?: string;
+  productName?: string;
+  quantity?: string;
+  tillName?: string;
+  session?: Date;
+  time?: string;
+  sellingUnit?: string;
+  attendant?: string;
+  supervisor?: string;
+  ordered?: string;
+  reason?: string;
+  branchcode?: string;
+  organisationName?: string;
+  organisationCode?: string;
+  branchName?: string;
+}
+
+export interface CreateOrderReversedDto {
+  invoicenr: string;
+  productID: string;
+  productName: string;
+  quantity: string;
+  tillName?: string;
+  session: Date;
+  time?: string;
+  sellingUnit?: string;
+  attendant: string;
+  supervisor?: string;
+  ordered?: string;
+  reason: string;
+}
+
+export interface UpdateOrderReversedDto {
+  quantity?: string;
+  supervisor?: string;
+  reason?: string;
+}
+
+// Orders Table Model
+export interface OrdersTbl {
+  refNo: number;
+  invoiceNr?: string;
+  productID?: string;
+  productName?: string;
+  qtyOrdered?: number;
+  qtySupplied?: number;
+  entryID?: string;
+  customerID?: string;
+  customername?: string;
+  entryDate?: Date;
+  tillName?: string;
+  time?: string;
+  session?: string;
+  status?: string;
+  remarks?: string;
+  supplierID?: string;
+  branchcode?: string;
+  organisationName?: string;
+  organisationCode?: string;
+  branchName?: string;
+}
+
+export interface CreateOrdersDto {
+  invoiceNr: string;
+  productID: string;
+  productName: string;
+  qtyOrdered: number;
+  qtySupplied?: number;
+  customerID?: string;
+  customername?: string;
+  entryDate: Date;
+  tillName?: string;
+  time?: string;
+  session?: string;
+  status?: string;
+  remarks?: string;
+  supplierID?: string;
+}
+
+export interface UpdateOrdersDto {
+  qtySupplied?: number;
+  status?: string;
+  remarks?: string;
+}
+
+// Organisation Information Model
+export interface OrganisationInformation {
+  refNo: number;
+  organisationName?: string;
+  postalAddress?: string;
+  physicalLocation?: string;
+  city?: string;
+  regionOrState?: string;
+  country?: string;
+  phoneNumber?: string;
+  email?: string;
+  website?: string;
+  taxIdentificationNumber?: string;
+  registrationNumber?: string;
+  dateEstablished?: Date;
+  numberOfEmployees?: number;
+  businessType?: string;
+  industryType?: string;
+  contactPerson?: string;
+  contactPersonPhone?: string;
+  logo?: string;
+  description?: string;
+  isActive?: boolean;
+  organisationCode?: string;
+}
+
+export interface CreateOrganisationDto {
+  organisationName: string;
+  postalAddress?: string;
+  physicalLocation?: string;
+  city?: string;
+  regionOrState?: string;
+  country: string;
+  phoneNumber: string;
+  email?: string;
+  website?: string;
+  taxIdentificationNumber?: string;
+  registrationNumber?: string;
+  dateEstablished?: Date;
+  numberOfEmployees?: number;
+  businessType?: string;
+  industryType?: string;
+  contactPerson?: string;
+  contactPersonPhone?: string;
+  logo?: string;
+  description?: string;
+}
+
+export interface UpdateOrganisationDto {
+  organisationName?: string;
+  postalAddress?: string;
+  physicalLocation?: string;
+  city?: string;
+  regionOrState?: string;
+  country?: string;
+  phoneNumber?: string;
+  email?: string;
+  website?: string;
+  taxIdentificationNumber?: string;
+  registrationNumber?: string;
+  dateEstablished?: Date;
+  numberOfEmployees?: number;
+  businessType?: string;
+  industryType?: string;
+  contactPerson?: string;
+  contactPersonPhone?: string;
+  logo?: string;
+  description?: string;
+  isActive?: boolean;
+}
