@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using PowerTraderPOS.API.Models;
+using PowerTraderPOS.API.Models.Tables;
 
 namespace PowerTraderPOS.API.Data
 {
@@ -14,6 +15,13 @@ namespace PowerTraderPOS.API.Data
         public DbSet<Sale> Sales { get; set; }
         public DbSet<SaleItem> SaleItems { get; set; }
         public DbSet<Product> Products { get; set; }
+        
+        // Database Tables
+        public DbSet<ProductsTbl> ProductsTbl { get; set; }
+        public DbSet<CustomerInfo> CustomerInfo { get; set; }
+        public DbSet<Suppliers> Suppliers { get; set; }
+        public DbSet<SalesDetails> SalesDetails { get; set; }
+        public DbSet<StaffInformation> StaffInformation { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
