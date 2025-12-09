@@ -54,6 +54,9 @@ namespace PowerTraderPOS.API.Data
         
         // Phase 1C: Pending Sales (Hold Orders)
         public DbSet<CashSalesPending> CashSalesPending { get; set; }
+        
+        // Phase 1D: Returns Processing
+        public DbSet<ReturnTransactions> ReturnTransactions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

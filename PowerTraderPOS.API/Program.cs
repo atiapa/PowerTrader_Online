@@ -36,6 +36,8 @@ builder.Services.AddScoped<IGiftCardService, GiftCardService>();
 builder.Services.AddScoped<IInventoryService, InventoryService>();
 // Phase 1C: Pending Sales (Hold Orders)
 builder.Services.AddScoped<IRetailSalesService, RetailSalesService>();
+// Phase 1D: Returns Processing
+builder.Services.AddScoped<IReturnService, ReturnService>();
 
 // Add JWT Authentication
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
