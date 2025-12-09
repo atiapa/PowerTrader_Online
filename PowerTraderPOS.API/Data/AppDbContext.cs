@@ -57,6 +57,9 @@ namespace PowerTraderPOS.API.Data
         
         // Phase 1D: Returns Processing
         public DbSet<ReturnTransactions> ReturnTransactions { get; set; }
+        
+        // Phase 1E: Financial Integration
+        public DbSet<AccountsLedger> AccountsLedger { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

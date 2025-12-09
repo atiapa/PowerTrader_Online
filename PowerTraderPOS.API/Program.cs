@@ -38,6 +38,8 @@ builder.Services.AddScoped<IInventoryService, InventoryService>();
 builder.Services.AddScoped<IRetailSalesService, RetailSalesService>();
 // Phase 1D: Returns Processing
 builder.Services.AddScoped<IReturnService, ReturnService>();
+// Phase 1E: Financial Integration
+builder.Services.AddScoped<IAccountingService, AccountingService>();
 
 // Add JWT Authentication
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
