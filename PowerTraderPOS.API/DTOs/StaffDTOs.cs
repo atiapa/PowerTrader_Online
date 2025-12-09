@@ -3,29 +3,58 @@ namespace PowerTraderPOS.API.DTOs
     // Staff DTOs
     public class StaffDto
     {
-        public int StaffId { get; set; }
-        public string? StaffName { get; set; }
-        public string? StaffPhone { get; set; }
-        public string? StaffEmail { get; set; }
-        public string? StaffRole { get; set; }
-        public bool? IsActive { get; set; }
+        public int Refno { get; set; }
+        public string? StaffID { get; set; }
+        public string? Surname { get; set; }
+        public string? OtherNames { get; set; }
+        public string? Gender { get; set; }
+        public DateTime? DateOfBirth { get; set; }
+        public string? StreetAddress { get; set; }
+        public string? City { get; set; }
+        public string? Country { get; set; }
+        public string? HomePhone { get; set; }
+        public string? CellPhone { get; set; }
+        public string? Email { get; set; }
+        public DateTime? DateOfEmployment { get; set; }
+        public string? Designation { get; set; }
+        public string? Department { get; set; }
+        public string? OrganisationName { get; set; }
+        public string? BranchName { get; set; }
     }
 
     public class CreateStaffDto
     {
-        public string StaffName { get; set; } = string.Empty;
-        public string? StaffPhone { get; set; }
-        public string? StaffEmail { get; set; }
-        public string StaffRole { get; set; } = string.Empty;
-        public bool IsActive { get; set; } = true;
+        public required string StaffID { get; set; }
+        public string? Surname { get; set; }
+        public string? OtherNames { get; set; }
+        public string? Gender { get; set; }
+        public DateTime? DateOfBirth { get; set; }
+        public string? StreetAddress { get; set; }
+        public string? City { get; set; }
+        public string? Country { get; set; }
+        public string? HomePhone { get; set; }
+        public string? CellPhone { get; set; }
+        public string? Email { get; set; }
+        public DateTime? DateOfEmployment { get; set; }
+        public string? Designation { get; set; }
+        public string? Department { get; set; }
+        public string? OrganisationName { get; set; }
+        public string? BranchName { get; set; }
     }
 
     public class UpdateStaffDto
     {
-        public string? StaffName { get; set; }
-        public string? StaffPhone { get; set; }
-        public string? StaffEmail { get; set; }
-        public string? StaffRole { get; set; }
-        public bool? IsActive { get; set; }
+        public string? Surname { get; set; }
+        public string? OtherNames { get; set; }
+        public string? StreetAddress { get; set; }
+        public string? City { get; set; }
+        public string? Country { get; set; }
+        public string? HomePhone { get; set; }
+        public string? CellPhone { get; set; }
+        public string? Email { get; set; }
+        public DateTime? DateOfBirth { get; set; }
+        public DateTime? DateOfEmployment { get; set; }
+        public string? Designation { get; set; }
+        public string? Department { get; set; }
     }
 }

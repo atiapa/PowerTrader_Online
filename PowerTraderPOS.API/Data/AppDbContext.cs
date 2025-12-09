@@ -1,6 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using PowerTraderPOS.API.Models;
-using PowerTraderPOS.API.Models.Tables;
+using PowerTraderPOS.API.Models.Existing;
+using TablesProductsTbl = PowerTraderPOS.API.Models.Tables.ProductsTbl;
+using TablesCustomerInfo = PowerTraderPOS.API.Models.Tables.CustomerInfo;
+using TablesSuppliers = PowerTraderPOS.API.Models.Tables.Suppliers;
+using TablesSalesDetails = PowerTraderPOS.API.Models.Tables.SalesDetails;
+using TablesStaffInformation = PowerTraderPOS.API.Models.Tables.StaffInformation;
 
 namespace PowerTraderPOS.API.Data
 {
@@ -17,11 +22,26 @@ namespace PowerTraderPOS.API.Data
         public DbSet<Product> Products { get; set; }
         
         // Database Tables
-        public DbSet<ProductsTbl> ProductsTbl { get; set; }
-        public DbSet<CustomerInfo> CustomerInfo { get; set; }
-        public DbSet<Suppliers> Suppliers { get; set; }
-        public DbSet<SalesDetails> SalesDetails { get; set; }
-        public DbSet<StaffInformation> StaffInformation { get; set; }
+        public DbSet<TablesProductsTbl> ProductsTbl { get; set; }
+        public DbSet<TablesCustomerInfo> CustomerInfo { get; set; }
+        public DbSet<TablesSuppliers> Suppliers { get; set; }
+        public DbSet<TablesSalesDetails> SalesDetails { get; set; }
+        public DbSet<TablesStaffInformation> StaffInformation { get; set; }
+        
+        // Additional Tables
+        public DbSet<Categories> Categories { get; set; }
+        public DbSet<Branches> Branches { get; set; }
+        public DbSet<AccountsCreation> AccountsCreation { get; set; }
+        public DbSet<ATCTbl> ATCTbl { get; set; }
+        public DbSet<AttendanceTbl> AttendanceTbl { get; set; }
+        public DbSet<Countries> Countries { get; set; }
+        public DbSet<StockMaster> StockMaster { get; set; }
+        public DbSet<SessionCreation> SessionCreation { get; set; }
+        public DbSet<PaymentVoucher> PaymentVoucher { get; set; }
+        public DbSet<VehicleRecords> VehicleRecords { get; set; }
+        public DbSet<TblServicing> TblServicing { get; set; }
+        public DbSet<OrganisationInformation> OrganisationInformation { get; set; }
+        public DbSet<WarehouseTbl> WarehouseTbl { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
