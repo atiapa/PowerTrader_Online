@@ -34,6 +34,8 @@ builder.Services.AddScoped<IAttendanceService, AttendanceService>();
 builder.Services.AddScoped<IGiftCardService, GiftCardService>();
 // Phase 1B: Inventory Management
 builder.Services.AddScoped<IInventoryService, InventoryService>();
+// Phase 1C: Pending Sales (Hold Orders)
+builder.Services.AddScoped<IRetailSalesService, RetailSalesService>();
 
 // Add JWT Authentication
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");

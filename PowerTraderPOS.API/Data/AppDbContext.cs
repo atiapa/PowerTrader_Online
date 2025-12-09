@@ -51,6 +51,9 @@ namespace PowerTraderPOS.API.Data
         
         // Phase 1B: Inventory Management
         public DbSet<RetailItems> RetailItems { get; set; }
+        
+        // Phase 1C: Pending Sales (Hold Orders)
+        public DbSet<CashSalesPending> CashSalesPending { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
