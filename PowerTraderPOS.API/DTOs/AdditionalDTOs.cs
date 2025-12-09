@@ -18,6 +18,7 @@ namespace PowerTraderPOS.API.DTOs
         public string? Description { get; set; }
         public string? ButtonColor { get; set; }
         public string? FontSize { get; set; }
+        public string? Branchcode { get; set; }
         public string? OrganisationName { get; set; }
         public string? BranchName { get; set; }
     }

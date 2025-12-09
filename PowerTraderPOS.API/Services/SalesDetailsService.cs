@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using PowerTraderPOS.API.Data;
 using PowerTraderPOS.API.DTOs;
-using PowerTraderPOS.API.Models.Existing;
+using PowerTraderPOS.API.Models.Tables;
 using PowerTraderPOS.API.Services.Interfaces;
 
 namespace PowerTraderPOS.API.Services
@@ -25,7 +25,7 @@ namespace PowerTraderPOS.API.Services
                     EntryDate = s.SaleDate,
                     ExtendedPrice = s.TotalAmount,
                     Tax = s.TaxAmount,
-                    Discount = sale.DiscountAmount,
+                    Discount = s.DiscountAmount,
                     Amountpaid = s.NetAmount
                 })
                 .ToListAsync();

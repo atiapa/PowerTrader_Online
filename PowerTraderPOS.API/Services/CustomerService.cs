@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using PowerTraderPOS.API.Data;
 using PowerTraderPOS.API.DTOs;
-using PowerTraderPOS.API.Models.Existing;
+using PowerTraderPOS.API.Models.Tables;
 using PowerTraderPOS.API.Services.Interfaces;
 
 namespace PowerTraderPOS.API.Services
@@ -94,8 +94,7 @@ namespace PowerTraderPOS.API.Services
                 DigitalAddress = dto.DigitalAddress,
                 Barcodenr = dto.Barcodenr,
                 OrganisationName = dto.OrganisationName,
-                BranchName = dto.BranchName,
-                EntryDate = DateTime.Now
+                BranchName = dto.BranchName
             };
 
             _context.Set<CustomerInfo>().Add(customer);

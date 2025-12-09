@@ -101,31 +101,79 @@ namespace PowerTraderPOS.API.Models.Existing
         public bool? IsActive { get; set; }
     }
 
-    [Table("tbl_customer_info")]
+    [Table("tbl_Customer_Info")]
     public class CustomerInfo
     {
         [Key]
-        [Column("customer_id")]
-        public int CustomerId { get; set; }
+        [Column("Refno")]
+        public decimal Refno { get; set; }
 
-        [Column("customer_name")]
+        [Column("AccountName")]
         [MaxLength(200)]
-        public string? CustomerName { get; set; }
+        public string? AccountName { get; set; }
 
-        [Column("customer_phone")]
+        [Column("Surname")]
         [MaxLength(50)]
-        public string? CustomerPhone { get; set; }
+        public string? Surname { get; set; }
 
-        [Column("customer_email")]
+        [Column("Othernames")]
         [MaxLength(100)]
-        public string? CustomerEmail { get; set; }
+        public string? Othernames { get; set; }
 
-        [Column("customer_address")]
-        [MaxLength(500)]
-        public string? CustomerAddress { get; set; }
+        [Column("AccountNr")]
+        [MaxLength(50)]
+        public string? AccountNr { get; set; }
 
-        [Column("is_active")]
-        public bool? IsActive { get; set; }
+        [Column("Address")]
+        public string? Address { get; set; }
+
+        [Column("City_Town")]
+        [MaxLength(100)]
+        public string? CityTown { get; set; }
+
+        [Column("Region_State")]
+        [MaxLength(100)]
+        public string? RegionState { get; set; }
+
+        [Column("PhoneNr")]
+        [MaxLength(100)]
+        public string? PhoneNr { get; set; }
+
+        [Column("CreditLimit")]
+        [Precision(18, 2)]
+        public decimal? CreditLimit { get; set; }
+
+        [Column("CustomerType")]
+        [MaxLength(50)]
+        public string? CustomerType { get; set; }
+
+        [Column("Sales_Rep")]
+        [MaxLength(100)]
+        public string? SalesRep { get; set; }
+
+        [Column("OpeningBalance")]
+        [Precision(18, 2)]
+        public decimal? OpeningBalance { get; set; }
+
+        [Column("Email")]
+        [MaxLength(100)]
+        public string? Email { get; set; }
+
+        [Column("DigitalAddress")]
+        [MaxLength(50)]
+        public string? DigitalAddress { get; set; }
+
+        [Column("Barcodenr")]
+        [MaxLength(50)]
+        public string? Barcodenr { get; set; }
+
+        [Column("OrganisationName")]
+        [MaxLength(200)]
+        public string? OrganisationName { get; set; }
+
+        [Column("BranchName")]
+        [MaxLength(50)]
+        public string? BranchName { get; set; }
     }
 
     [Table("suppliers")]

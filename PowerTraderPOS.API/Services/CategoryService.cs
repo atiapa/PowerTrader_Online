@@ -23,11 +23,9 @@ namespace PowerTraderPOS.API.Services
                     CategoryID = c.CategoryID,
                     CategoryName = c.CategoryName,
                     Description = c.Description,
-                    Buttoncolor = c.Buttoncolor,
-                    Fontsize = c.Fontsize,
+                    ButtonColor = c.ButtonColor,
+                    FontSize = c.FontSize,
                     OrganisationName = c.OrganisationName,
-                    Branchcode = c.Branchcode,
-                    OrganisationCode = c.OrganisationCode,
                     BranchName = c.BranchName
                 })
                 .ToListAsync();
@@ -43,11 +41,9 @@ namespace PowerTraderPOS.API.Services
                 CategoryID = category.CategoryID,
                 CategoryName = category.CategoryName,
                 Description = category.Description,
-                Buttoncolor = category.Buttoncolor,
-                Fontsize = category.Fontsize,
+                ButtonColor = category.ButtonColor,
+                FontSize = category.FontSize,
                 OrganisationName = category.OrganisationName,
-                Branchcode = category.Branchcode,
-                OrganisationCode = category.OrganisationCode,
                 BranchName = category.BranchName
             };
         }
@@ -58,9 +54,11 @@ namespace PowerTraderPOS.API.Services
             {
                 CategoryName = dto.CategoryName,
                 Description = dto.Description,
-                Buttoncolor = dto.Buttoncolor,
-                Fontsize = dto.Fontsize,
-                Branchcode = dto.Branchcode
+                ButtonColor = dto.ButtonColor,
+                FontSize = dto.FontSize,
+                Branchcode = dto.Branchcode,
+                OrganisationName = dto.OrganisationName,
+                BranchName = dto.BranchName
             };
 
             _context.Categories.Add(category);
@@ -76,8 +74,8 @@ namespace PowerTraderPOS.API.Services
 
             if (dto.CategoryName != null) category.CategoryName = dto.CategoryName;
             if (dto.Description != null) category.Description = dto.Description;
-            if (dto.Buttoncolor != null) category.Buttoncolor = dto.Buttoncolor;
-            if (dto.Fontsize != null) category.Fontsize = dto.Fontsize;
+            if (dto.ButtonColor != null) category.ButtonColor = dto.ButtonColor;
+            if (dto.FontSize != null) category.FontSize = dto.FontSize;
 
             await _context.SaveChangesAsync();
             return await GetCategoryByIdAsync(id);
@@ -103,8 +101,10 @@ namespace PowerTraderPOS.API.Services
                     CategoryID = c.CategoryID,
                     CategoryName = c.CategoryName,
                     Description = c.Description,
-                    Buttoncolor = c.Buttoncolor,
-                    Fontsize = c.Fontsize
+                    ButtonColor = c.ButtonColor,
+                    FontSize = c.FontSize,
+                    OrganisationName = c.OrganisationName,
+                    BranchName = c.BranchName
                 })
                 .ToListAsync();
         }
