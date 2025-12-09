@@ -12,7 +12,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("AppDbContext")));
 
-// Register Services
+// Add HTTP Context Accessor for multi-tenant support
+builder.Services.AddHttpContextAccessor();
+
+// Register Multi-Tenant Infrastructure Services
+builder.Services.AddScoped<IUserContextService, UserContextService>();
+
+// Register Business Services
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<ISupplierService, SupplierService>();
