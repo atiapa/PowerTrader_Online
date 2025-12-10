@@ -1,7 +1,7 @@
 # PowerTrader_Online
 Cloud-based Multi-Tenant Point of Sales System
 
-> **Note**: This branch (10_Dec_2025_TMT) restores the complete POS feature set from PR #1 that was previously reverted on main.
+> **Note**: This PR restores the complete POS feature set from PR #1 (originally merged at commit 11046f5) that was previously reverted by commit ba3cc63 on main. All features have been restored by reverting the revert commit, bringing back the complete multi-tenant POS system with Angular frontend, .NET Core backend, and all associated features.
 
 ## Overview
 A comprehensive, touchscreen-optimized POS system with Angular frontend and .NET Core API backend, supporting multiple tenants with role-based dashboards.
