@@ -37,7 +37,12 @@ git checkout -b 10_Dec_2025_TMT
 
 # Revert the revert commit to restore PR #1 changes
 echo "Reverting the revert commit to restore PR #1 changes..."
-git revert $REVERT_COMMIT --no-edit
+if git rev-parse $REVERT_COMMIT >/dev/null 2>&1; then
+    git revert $REVERT_COMMIT --no-edit
+else
+    echo "Error: Revert commit $REVERT_COMMIT not found in repository"
+    exit 1
+fi
 
 # Verify the changes
 echo "Verifying repository content..."
