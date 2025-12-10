@@ -1,0 +1,26 @@
+<mat-toolbar color="primary">
+  <span>Customers Dashboard - {{currentUser?.fullName}}</span>
+  <span class="spacer"></span>
+  <button mat-raised-button color="accent" (click)="logout()">Logout</button>
+</mat-toolbar>
+<div class="dashboard-container">
+  <h1>Customers Dashboard</h1>
+  <div class="dashboard-grid">
+    <mat-card>
+      <mat-card-header><mat-card-title>Customer Management</mat-card-title></mat-card-header>
+      <mat-card-content><p>Manage customer information</p></mat-card-content>
+    </mat-card>
+    <mat-card>
+      <mat-card-header><mat-card-title>Sales History</mat-card-title></mat-card-header>
+      <mat-card-content><p>View customer purchase history</p></mat-card-content>
+    </mat-card>
+    <mat-card>
+      <mat-card-header><mat-card-title>Loyalty Programs</mat-card-title></mat-card-header>
+      <mat-card-content><p>Manage loyalty programs</p></mat-card-content>
+    </mat-card>
+    <mat-card>
+      <mat-card-header><mat-card-title>Customer Support</mat-card-title></mat-card-header>
+      <mat-card-content><p>Handle customer inquiries</p></mat-card-content>
+    </mat-card>
+  </div>
+</div>
