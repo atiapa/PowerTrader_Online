@@ -13,6 +13,9 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatDividerModule } from '@angular/material/divider';
 import { ApiService } from '../../services/api.service';
 import { AuthService } from '../../services/auth.service';
 import { Product, SaleItem, CreateSaleRequest } from '../../models/models';
@@ -20,6 +23,32 @@ import { Product, SaleItem, CreateSaleRequest } from '../../models/models';
 interface Category {
   id: number;
   name: string;
+}
+
+interface DiscountType {
+  id: string;
+  name: string;
+  icon: string;
+}
+
+interface PaymentSplit {
+  method: string;
+  amount: number;
+}
+
+interface Receipt {
+  transactionNumber: string;
+  date: Date;
+  items: SaleItem[];
+  subtotal: number;
+  tax: number;
+  discount: number;
+  total: number;
+  paymentMethod: string;
+  customerName?: string;
+  customerPhone?: string;
+  cashReceived?: number;
+  change?: number;
 }
 
 @Component({
@@ -39,7 +68,10 @@ interface Category {
     MatBadgeModule,
     MatDialogModule,
     MatGridListModule,
-    MatChipsModule
+    MatChipsModule,
+    MatCheckboxModule,
+    MatRadioModule,
+    MatDividerModule
   ],
   templateUrl: './retail-sales-point.component.html',
   styleUrl: './retail-sales-point.component.scss'
@@ -60,6 +92,7 @@ export class RetailSalesPointComponent implements OnInit {
   
   // Cart Management
   cartItems: SaleItem[] = [];
+  selectedCartItems: Set<number> = new Set();
   
   // Search and Input
   searchTerm: string = '';
@@ -69,13 +102,49 @@ export class RetailSalesPointComponent implements OnInit {
   paymentMethod: string = 'Cash';
   paymentMethods = ['Cash', 'Card', 'Mobile Money', 'Bank Transfer'];
   
+  // Split Payment
+  useSplitPayment: boolean = false;
+  paymentSplits: PaymentSplit[] = [];
+  currentSplitMethod: string = 'Cash';
+  currentSplitAmount: number = 0;
+  
+  // Cash Payment
+  cashReceived: number = 0;
+  showCashCalculator: boolean = false;
+  
   // Customer Info
   customerName: string = '';
   customerPhone: string = '';
+  customerEmail: string = '';
+  customerLoyaltyPoints: number = 0;
+  
+  // Discount Management
+  discountTypes: DiscountType[] = [
+    { id: 'manual', name: 'Manual Discount', icon: 'percent' },
+    { id: 'promotional', name: 'Promotional', icon: 'local_offer' },
+    { id: 'clearance', name: 'Clearance Sale', icon: 'sell' },
+    { id: 'loyalty', name: 'Loyalty Points', icon: 'stars' }
+  ];
+  showDiscountPanel: boolean = false;
+  selectedDiscountType: string = 'manual';
+  discountValue: number = 0;
+  discountPercentage: number = 0;
+  applyDiscountToAll: boolean = true;
+  
+  // Promotional and Clearance (Auto-applied)
+  promotionalDiscountRate: number = 0; // Set from backend
+  clearanceDiscountRate: number = 0; // Set from product management
+  
+  // Loyalty Points
+  usePointsAsDiscount: boolean = false;
+  loyaltyPointsToRedeem: number = 0;
+  pointsConversionRate: number = 0.01; // $1 per 100 points
   
   // UI State
   isLoading: boolean = false;
   showCheckout: boolean = false;
+  showReceipt: boolean = false;
+  currentReceipt: Receipt | null = null;
   
   // Numeric Keypad
   quantity: number = 1;
@@ -89,6 +158,8 @@ export class RetailSalesPointComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadProducts();
+    this.loadCustomerLoyaltyPoints();
+    this.checkPromotionalPeriod();
   }
 
   loadProducts(): void {
@@ -96,12 +167,38 @@ export class RetailSalesPointComponent implements OnInit {
     this.apiService.getProducts().subscribe({
       next: (products) => {
         this.allProducts = products;
+        this.applyAutomaticDiscounts();
         this.filterProducts();
         this.isLoading = false;
       },
       error: (error) => {
         this.snackBar.open('Error loading products', 'Close', { duration: 3000 });
         this.isLoading = false;
+      }
+    });
+  }
+
+  loadCustomerLoyaltyPoints(): void {
+    // In real implementation, load from API based on customer phone/email
+    // For now, simulate with dummy data
+    this.customerLoyaltyPoints = 500; // Example: 500 points
+  }
+
+  checkPromotionalPeriod(): void {
+    // Check if current date is within promotional period
+    // This would typically come from backend configuration
+    const now = new Date();
+    // Example: Promotional discount of 10% during holiday season
+    this.promotionalDiscountRate = 0.10; // 10% off
+  }
+
+  applyAutomaticDiscounts(): void {
+    // Apply clearance discounts from product management
+    this.allProducts.forEach(product => {
+      // In real implementation, check if product has clearance flag
+      // For demo, assume some products have clearance
+      if (product.code?.startsWith('CL')) {
+        this.clearanceDiscountRate = 0.15; // 15% clearance discount
       }
     });
   }
@@ -158,23 +255,43 @@ export class RetailSalesPointComponent implements OnInit {
     
     if (existingItem) {
       existingItem.quantity += this.quantity;
-      existingItem.totalPrice = existingItem.quantity * existingItem.unitPrice;
-      existingItem.netPrice = existingItem.totalPrice - existingItem.discountAmount;
+      this.recalculateItemTotal(existingItem);
     } else {
-      const totalPrice = product.price * this.quantity;
-      this.cartItems.push({
+      const newItem: SaleItem = {
         productName: product.name,
         productCode: product.code,
         quantity: this.quantity,
         unitPrice: product.price,
-        totalPrice: totalPrice,
+        totalPrice: product.price * this.quantity,
         discountAmount: 0,
-        netPrice: totalPrice
-      });
+        netPrice: product.price * this.quantity
+      };
+      this.cartItems.push(newItem);
+      this.recalculateItemTotal(newItem);
     }
     
     this.quantity = 1;
     this.showFeedback('Product added to cart');
+  }
+
+  recalculateItemTotal(item: SaleItem): void {
+    item.totalPrice = item.quantity * item.unitPrice;
+    
+    // Apply automatic discounts
+    let discount = 0;
+    
+    // Promotional discount
+    if (this.promotionalDiscountRate > 0) {
+      discount += item.totalPrice * this.promotionalDiscountRate;
+    }
+    
+    // Clearance discount (check if product code starts with CL)
+    if (item.productCode?.startsWith('CL') && this.clearanceDiscountRate > 0) {
+      discount += item.totalPrice * this.clearanceDiscountRate;
+    }
+    
+    item.discountAmount = discount;
+    item.netPrice = item.totalPrice - discount;
   }
 
   updateQuantity(item: SaleItem, change: number): void {
@@ -182,14 +299,22 @@ export class RetailSalesPointComponent implements OnInit {
     if (item.quantity < 1) {
       item.quantity = 1;
     }
-    item.totalPrice = item.quantity * item.unitPrice;
-    item.netPrice = item.totalPrice - item.discountAmount;
+    this.recalculateItemTotal(item);
+  }
+
+  toggleCartItemSelection(index: number): void {
+    if (this.selectedCartItems.has(index)) {
+      this.selectedCartItems.delete(index);
+    } else {
+      this.selectedCartItems.add(index);
+    }
   }
 
   removeFromCart(item: SaleItem): void {
     const index = this.cartItems.indexOf(item);
     if (index > -1) {
       this.cartItems.splice(index, 1);
+      this.selectedCartItems.delete(index);
       this.showFeedback('Item removed from cart');
     }
   }
@@ -198,11 +323,80 @@ export class RetailSalesPointComponent implements OnInit {
     if (this.cartItems.length > 0) {
       if (confirm('Are you sure you want to clear the cart?')) {
         this.cartItems = [];
-        this.customerName = '';
-        this.customerPhone = '';
+        this.selectedCartItems.clear();
+        this.resetDiscounts();
         this.showFeedback('Cart cleared');
       }
     }
+  }
+
+  // Discount Functions
+  toggleDiscountPanel(): void {
+    this.showDiscountPanel = !this.showDiscountPanel;
+  }
+
+  applyManualDiscount(): void {
+    if (this.applyDiscountToAll) {
+      // Apply to all items
+      this.cartItems.forEach(item => {
+        const additionalDiscount = this.discountPercentage > 0 
+          ? item.totalPrice * (this.discountPercentage / 100)
+          : this.discountValue;
+        item.discountAmount += additionalDiscount;
+        item.netPrice = item.totalPrice - item.discountAmount;
+      });
+    } else {
+      // Apply to selected items only
+      this.cartItems.forEach((item, index) => {
+        if (this.selectedCartItems.has(index)) {
+          const additionalDiscount = this.discountPercentage > 0 
+            ? item.totalPrice * (this.discountPercentage / 100)
+            : this.discountValue;
+          item.discountAmount += additionalDiscount;
+          item.netPrice = item.totalPrice - item.discountAmount;
+        }
+      });
+    }
+    this.showFeedback('Discount applied');
+    this.showDiscountPanel = false;
+  }
+
+  applyLoyaltyDiscount(): void {
+    if (this.loyaltyPointsToRedeem > this.customerLoyaltyPoints) {
+      this.snackBar.open('Insufficient loyalty points', 'Close', { duration: 3000 });
+      return;
+    }
+    
+    const discountAmount = this.loyaltyPointsToRedeem * this.pointsConversionRate;
+    const totalAmount = this.getSubtotal();
+    
+    if (discountAmount > totalAmount) {
+      this.snackBar.open('Discount exceeds total amount', 'Close', { duration: 3000 });
+      return;
+    }
+    
+    // Distribute discount proportionally across items
+    const discountRatio = discountAmount / totalAmount;
+    this.cartItems.forEach(item => {
+      const itemDiscount = item.totalPrice * discountRatio;
+      item.discountAmount += itemDiscount;
+      item.netPrice = item.totalPrice - item.discountAmount;
+    });
+    
+    this.usePointsAsDiscount = true;
+    this.showFeedback(`Applied ${this.loyaltyPointsToRedeem} loyalty points as discount`);
+    this.showDiscountPanel = false;
+  }
+
+  resetDiscounts(): void {
+    this.cartItems.forEach(item => {
+      item.discountAmount = 0;
+      this.recalculateItemTotal(item);
+    });
+    this.discountValue = 0;
+    this.discountPercentage = 0;
+    this.loyaltyPointsToRedeem = 0;
+    this.usePointsAsDiscount = false;
   }
 
   // Numeric Keypad Functions
@@ -215,16 +409,73 @@ export class RetailSalesPointComponent implements OnInit {
     return this.cartItems.reduce((sum, item) => sum + item.totalPrice, 0);
   }
 
+  getTotalDiscount(): number {
+    return this.cartItems.reduce((sum, item) => sum + item.discountAmount, 0);
+  }
+
+  getSubtotalAfterDiscount(): number {
+    return this.getSubtotal() - this.getTotalDiscount();
+  }
+
   getTax(): number {
-    return this.getSubtotal() * 0.1; // 10% tax
+    return this.getSubtotalAfterDiscount() * 0.1; // 10% tax
   }
 
   getTotal(): number {
-    return this.getSubtotal() + this.getTax();
+    return this.getSubtotalAfterDiscount() + this.getTax();
+  }
+
+  getChange(): number {
+    if (this.cashReceived > 0) {
+      return Math.max(0, this.cashReceived - this.getTotal());
+    }
+    return 0;
   }
 
   getCartItemCount(): number {
     return this.cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  }
+
+  getTotalSplitPayments(): number {
+    return this.paymentSplits.reduce((sum, split) => sum + split.amount, 0);
+  }
+
+  getRemainingAmount(): number {
+    return Math.max(0, this.getTotal() - this.getTotalSplitPayments());
+  }
+
+  // Split Payment Functions
+  addPaymentSplit(): void {
+    if (this.currentSplitAmount <= 0) {
+      this.snackBar.open('Enter a valid amount', 'Close', { duration: 3000 });
+      return;
+    }
+    
+    if (this.getTotalSplitPayments() + this.currentSplitAmount > this.getTotal()) {
+      this.snackBar.open('Amount exceeds total', 'Close', { duration: 3000 });
+      return;
+    }
+    
+    this.paymentSplits.push({
+      method: this.currentSplitMethod,
+      amount: this.currentSplitAmount
+    });
+    
+    this.currentSplitAmount = 0;
+    this.showFeedback('Payment split added');
+  }
+
+  removePaymentSplit(index: number): void {
+    this.paymentSplits.splice(index, 1);
+  }
+
+  // Cash Calculator
+  addCashAmount(amount: number): void {
+    this.cashReceived += amount;
+  }
+
+  clearCashAmount(): void {
+    this.cashReceived = 0;
   }
 
   // Checkout Functions
@@ -234,10 +485,19 @@ export class RetailSalesPointComponent implements OnInit {
       return;
     }
     this.showCheckout = true;
+    this.showCashCalculator = this.paymentMethod === 'Cash';
   }
 
   closeCheckout(): void {
     this.showCheckout = false;
+    this.showCashCalculator = false;
+  }
+
+  onPaymentMethodChange(): void {
+    this.showCashCalculator = this.paymentMethod === 'Cash';
+    if (this.paymentMethod !== 'Cash') {
+      this.cashReceived = 0;
+    }
   }
 
   completeSale(): void {
@@ -246,22 +506,36 @@ export class RetailSalesPointComponent implements OnInit {
       return;
     }
 
-    if (!this.paymentMethod) {
-      this.snackBar.open('Please select payment method', 'Close', { duration: 3000 });
-      return;
+    // Validate payment
+    if (this.useSplitPayment) {
+      if (this.getRemainingAmount() > 0) {
+        this.snackBar.open('Payment incomplete. Add remaining splits.', 'Close', { duration: 3000 });
+        return;
+      }
+    } else {
+      if (!this.paymentMethod) {
+        this.snackBar.open('Select payment method', 'Close', { duration: 3000 });
+        return;
+      }
+      
+      if (this.paymentMethod === 'Cash' && this.cashReceived < this.getTotal()) {
+        this.snackBar.open('Insufficient cash received', 'Close', { duration: 3000 });
+        return;
+      }
     }
 
     this.isLoading = true;
     const subtotal = this.getSubtotal();
     const tax = this.getTax();
     const total = this.getTotal();
+    const discount = this.getTotalDiscount();
 
     const saleRequest: CreateSaleRequest = {
       totalAmount: subtotal,
       taxAmount: tax,
-      discountAmount: 0,
+      discountAmount: discount,
       netAmount: total,
-      paymentMethod: this.paymentMethod,
+      paymentMethod: this.useSplitPayment ? 'Split Payment' : this.paymentMethod,
       customerName: this.customerName || undefined,
       customerPhone: this.customerPhone || undefined,
       items: this.cartItems
@@ -269,27 +543,78 @@ export class RetailSalesPointComponent implements OnInit {
 
     this.apiService.createSale(saleRequest).subscribe({
       next: (sale) => {
-        this.snackBar.open(`Sale completed! Transaction: ${sale.transactionNumber}`, 'Close', { 
-          duration: 5000 
-        });
-        this.resetSale();
+        // Create receipt
+        this.currentReceipt = {
+          transactionNumber: sale.transactionNumber || 'TXN' + Date.now(),
+          date: new Date(),
+          items: [...this.cartItems],
+          subtotal: subtotal,
+          tax: tax,
+          discount: discount,
+          total: total,
+          paymentMethod: this.useSplitPayment ? 'Split Payment' : this.paymentMethod,
+          customerName: this.customerName,
+          customerPhone: this.customerPhone,
+          cashReceived: this.paymentMethod === 'Cash' ? this.cashReceived : undefined,
+          change: this.paymentMethod === 'Cash' ? this.getChange() : undefined
+        };
+        
+        this.showCheckout = false;
+        this.showReceipt = true;
+        this.isLoading = false;
+        
+        this.showFeedback('Sale completed successfully!');
       },
       error: (error) => {
-        this.snackBar.open('Error completing sale. Please try again.', 'Close', { 
-          duration: 3000 
-        });
+        this.snackBar.open('Error completing sale', 'Close', { duration: 3000 });
         this.isLoading = false;
       }
     });
   }
 
+  // Receipt Functions
+  printReceipt(): void {
+    window.print();
+    this.showFeedback('Printing receipt...');
+  }
+
+  emailReceipt(): void {
+    if (!this.customerEmail && !this.currentReceipt?.customerName) {
+      this.snackBar.open('Enter customer email', 'Close', { duration: 3000 });
+      return;
+    }
+    
+    // In real implementation, call API to send email
+    this.showFeedback('Receipt sent via email');
+  }
+
+  smsReceipt(): void {
+    if (!this.customerPhone && !this.currentReceipt?.customerPhone) {
+      this.snackBar.open('Enter customer phone', 'Close', { duration: 3000 });
+      return;
+    }
+    
+    // In real implementation, call API to send SMS
+    this.showFeedback('Receipt confirmation sent via SMS');
+  }
+
+  closeReceipt(): void {
+    this.showReceipt = false;
+    this.resetSale();
+  }
+
   resetSale(): void {
     this.cartItems = [];
+    this.selectedCartItems.clear();
     this.customerName = '';
     this.customerPhone = '';
+    this.customerEmail = '';
     this.paymentMethod = 'Cash';
-    this.showCheckout = false;
-    this.isLoading = false;
+    this.cashReceived = 0;
+    this.useSplitPayment = false;
+    this.paymentSplits = [];
+    this.currentReceipt = null;
+    this.resetDiscounts();
   }
 
   // Utility Functions
