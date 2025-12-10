@@ -19,7 +19,9 @@ namespace PowerTraderPOS.API.Services
 
         public async Task<AccountsLedgerDto> CreateJournalEntryAsync(CreateJournalEntryDto dto)
         {
-            var (orgCode, branchCode, userId, _) = await GetUserContextAsync();
+            var orgCode = _userContext.GetOrganisationCode();
+            var branchCode = _userContext.GetBranchCode();
+            var userId = _userContext.GetUserId();
 
             var entry = new AccountsLedger
             {
@@ -48,7 +50,9 @@ namespace PowerTraderPOS.API.Services
             DateTime? fromDate = null,
             DateTime? toDate = null)
         {
-            var (orgCode, branchCode, _, isAdmin) = await GetUserContextAsync();
+            var orgCode = _userContext.GetOrganisationCode();
+            var branchCode = _userContext.GetBranchCode();
+            var isAdmin = _userContext.IsAdmin();
 
             var query = _context.AccountsLedger.AsQueryable();
 
@@ -77,7 +81,9 @@ namespace PowerTraderPOS.API.Services
 
         public async Task<AccountsLedgerDto?> GetLedgerEntryByIdAsync(int ledgerId)
         {
-            var (orgCode, branchCode, _, isAdmin) = await GetUserContextAsync();
+            var orgCode = _userContext.GetOrganisationCode();
+            var branchCode = _userContext.GetBranchCode();
+            var isAdmin = _userContext.IsAdmin();
 
             var entry = isAdmin
                 ? await _context.AccountsLedger
@@ -92,7 +98,9 @@ namespace PowerTraderPOS.API.Services
 
         public async Task<decimal> GetAccountBalanceAsync(string accountCode)
         {
-            var (orgCode, branchCode, _, isAdmin) = await GetUserContextAsync();
+            var orgCode = _userContext.GetOrganisationCode();
+            var branchCode = _userContext.GetBranchCode();
+            var isAdmin = _userContext.IsAdmin();
 
             var query = _context.AccountsLedger
                 .Where(e => e.AccountCode == accountCode);
@@ -121,7 +129,9 @@ namespace PowerTraderPOS.API.Services
 
         public async Task<TrialBalanceDto> GetTrialBalanceAsync()
         {
-            var (orgCode, branchCode, _, isAdmin) = await GetUserContextAsync();
+            var orgCode = _userContext.GetOrganisationCode();
+            var branchCode = _userContext.GetBranchCode();
+            var isAdmin = _userContext.IsAdmin();
 
             var query = _context.AccountsLedger.AsQueryable();
 
@@ -180,7 +190,9 @@ namespace PowerTraderPOS.API.Services
 
         public async Task<FinancialReportDto> GetFinancialReportAsync(DateTime fromDate, DateTime toDate)
         {
-            var (orgCode, branchCode, _, isAdmin) = await GetUserContextAsync();
+            var orgCode = _userContext.GetOrganisationCode();
+            var branchCode = _userContext.GetBranchCode();
+            var isAdmin = _userContext.IsAdmin();
 
             var query = _context.AccountsLedger
                 .Where(e => e.TransactionDate >= fromDate && e.TransactionDate <= toDate);
@@ -226,7 +238,9 @@ namespace PowerTraderPOS.API.Services
 
         public async Task<List<int>> PostSaleTransactionAsync(PostSaleTransactionDto dto)
         {
-            var (orgCode, branchCode, userId, _) = await GetUserContextAsync();
+            var orgCode = _userContext.GetOrganisationCode();
+            var branchCode = _userContext.GetBranchCode();
+            var userId = _userContext.GetUserId();
             var ledgerIds = new List<int>();
 
             // Entry 1: DR Cash/Card/Mobile, CR Sales Revenue
@@ -304,7 +318,9 @@ namespace PowerTraderPOS.API.Services
 
         public async Task<List<int>> PostReturnTransactionAsync(PostReturnTransactionDto dto)
         {
-            var (orgCode, branchCode, userId, _) = await GetUserContextAsync();
+            var orgCode = _userContext.GetOrganisationCode();
+            var branchCode = _userContext.GetBranchCode();
+            var userId = _userContext.GetUserId();
             var ledgerIds = new List<int>();
 
             // Entry 1: DR Sales Returns, CR Cash/Refund
@@ -382,7 +398,9 @@ namespace PowerTraderPOS.API.Services
 
         public async Task<bool> DeleteLedgerEntryAsync(int ledgerId)
         {
-            var (orgCode, branchCode, _, isAdmin) = await GetUserContextAsync();
+            var orgCode = _userContext.GetOrganisationCode();
+            var branchCode = _userContext.GetBranchCode();
+            var isAdmin = _userContext.IsAdmin();
 
             var entry = isAdmin
                 ? await _context.AccountsLedger
@@ -443,7 +461,9 @@ namespace PowerTraderPOS.API.Services
 
         public async Task<ProfitAndLossReportDto> GetProfitAndLossReportAsync(DateTime fromDate, DateTime toDate)
         {
-            var (orgCode, branchCode, _, isAdmin) = await GetUserContextAsync();
+            var orgCode = _userContext.GetOrganisationCode();
+            var branchCode = _userContext.GetBranchCode();
+            var isAdmin = _userContext.IsAdmin();
 
             var query = _context.AccountsLedger
                 .Where(e => e.TransactionDate >= fromDate && e.TransactionDate <= toDate);
@@ -519,7 +539,9 @@ namespace PowerTraderPOS.API.Services
 
         public async Task<CashFlowStatementDto> GetCashFlowStatementAsync(DateTime fromDate, DateTime toDate)
         {
-            var (orgCode, branchCode, _, isAdmin) = await GetUserContextAsync();
+            var orgCode = _userContext.GetOrganisationCode();
+            var branchCode = _userContext.GetBranchCode();
+            var isAdmin = _userContext.IsAdmin();
 
             var query = _context.AccountsLedger
                 .Where(e => e.TransactionDate >= fromDate && e.TransactionDate <= toDate);
@@ -590,7 +612,9 @@ namespace PowerTraderPOS.API.Services
 
         public async Task<SalesAnalyticsReportDto> GetSalesAnalyticsReportAsync(DateTime fromDate, DateTime toDate)
         {
-            var (orgCode, branchCode, _, isAdmin) = await GetUserContextAsync();
+            var orgCode = _userContext.GetOrganisationCode();
+            var branchCode = _userContext.GetBranchCode();
+            var isAdmin = _userContext.IsAdmin();
 
             // Get ledger entries for the period
             var ledgerQuery = _context.AccountsLedger
