@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-All security vulnerabilities identified in the PowerTrader POS system have been successfully resolved. The application has been upgraded from Angular 18.2.14 to Angular 19.2.17, which includes critical security patches for XSS and XSRF vulnerabilities.
+All security vulnerabilities identified in the PowerTrader POS system have been successfully resolved. The application has been upgraded from Angular 18.2.14 to Angular 19.2.17, which includes critical security patches for XSS and CSRF vulnerabilities.
 
 **Current Security Status: ✅ 0 Vulnerabilities**
 
@@ -16,14 +16,14 @@ All security vulnerabilities identified in the PowerTrader POS system have been 
 
 ## Vulnerabilities Addressed
 
-### 1. XSRF Token Leakage via Protocol-Relative URLs (RESOLVED ✅)
+### 1. CSRF Token Leakage via Protocol-Relative URLs (RESOLVED ✅)
 
 **Severity**: Moderate  
 **Component**: @angular/common (Angular HTTP Client)  
 **CVE References**: Multiple advisories  
 
 **Description**:  
-Angular HTTP Client was vulnerable to XSRF token leakage when using protocol-relative URLs. This could allow attackers to steal XSRF tokens and perform cross-site request forgery attacks.
+Angular HTTP Client was vulnerable to CSRF token leakage when using protocol-relative URLs. This could allow attackers to steal CSRF tokens and perform cross-site request forgery attacks.
 
 **Affected Versions**:
 - Angular >= 21.0.0-next.0, < 21.0.1
@@ -33,7 +33,7 @@ Angular HTTP Client was vulnerable to XSRF token leakage when using protocol-rel
 **Fix Applied**:
 - Upgraded @angular/common to version 19.2.17
 - Patch includes proper handling of protocol-relative URLs
-- XSRF token protection mechanisms strengthened
+- CSRF token protection mechanisms strengthened
 
 **Verification**:
 ```bash
