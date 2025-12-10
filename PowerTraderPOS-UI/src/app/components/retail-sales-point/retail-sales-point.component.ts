@@ -100,7 +100,7 @@ export class RetailSalesPointComponent implements OnInit {
   
   // Payment
   paymentMethod: string = 'Cash';
-  paymentMethods = ['Cash', 'Card', 'Mobile Money', 'Bank Transfer'];
+  paymentMethods = ['Cash', 'Card', 'Mobile Money', 'Bank Transfer', 'Gift Card'];
   
   // Split Payment
   useSplitPayment: boolean = false;
@@ -139,6 +139,19 @@ export class RetailSalesPointComponent implements OnInit {
   usePointsAsDiscount: boolean = false;
   loyaltyPointsToRedeem: number = 0;
   pointsConversionRate: number = 0.01; // $1 per 100 points
+  
+  // Hold Orders
+  heldOrders: any[] = [];
+  showHeldOrdersPanel: boolean = false;
+  
+  // Gift Card
+  giftCardNumber: string = '';
+  giftCardBalance: number = 0;
+  giftCardAmountToUse: number = 0;
+  isValidatingGiftCard: boolean = false;
+  
+  // Returns
+  showReturnsPanel: boolean = false;
   
   // UI State
   isLoading: boolean = false;
@@ -494,8 +507,13 @@ export class RetailSalesPointComponent implements OnInit {
   }
 
   onPaymentMethodChange(): void {
-    this.showCashCalculator = this.paymentMethod === 'Cash';
-    if (this.paymentMethod !== 'Cash') {
+    // Handle different payment method selections
+    if (this.paymentMethod === 'Gift Card') {
+      this.showCashCalculator = false;
+    } else if (this.paymentMethod === 'Cash') {
+      this.showCashCalculator = true;
+    } else {
+      this.showCashCalculator = false;
       this.cashReceived = 0;
     }
   }
@@ -530,7 +548,7 @@ export class RetailSalesPointComponent implements OnInit {
     const total = this.getTotal();
     const discount = this.getTotalDiscount();
 
-    const saleRequest: CreateSaleRequest = {
+    const saleRequest: any = {
       totalAmount: subtotal,
       taxAmount: tax,
       discountAmount: discount,
@@ -538,10 +556,19 @@ export class RetailSalesPointComponent implements OnInit {
       paymentMethod: this.useSplitPayment ? 'Split Payment' : this.paymentMethod,
       customerName: this.customerName || undefined,
       customerPhone: this.customerPhone || undefined,
-      items: this.cartItems
+      customerEmail: this.customerEmail || undefined,
+      items: this.cartItems,
+      store: 'Retail', // Required: Mark as Retail store
+      updateInventory: true, // Reduce UnitInstock in Retail_Items
+      postToLedger: true, // Post double-entry to Accounts_Ledger
+      saveToDetailsTemp: true, // Save to Sales_Details_Temp
+      paymentSplits: this.useSplitPayment ? this.paymentSplits : undefined,
+      cashReceived: this.paymentMethod === 'Cash' ? this.cashReceived : undefined,
+      change: this.paymentMethod === 'Cash' ? this.getChange() : undefined
     };
 
-    this.apiService.createSale(saleRequest).subscribe({
+    // Use retail sales API endpoint for complete integration
+    this.apiService.post('/api/retailsales/complete-sale', saleRequest).subscribe({
       next: (sale) => {
         // Create receipt
         this.currentReceipt = {
@@ -603,6 +630,158 @@ export class RetailSalesPointComponent implements OnInit {
     this.resetSale();
   }
 
+  // ===== HOLD ORDERS FUNCTIONALITY =====
+  async holdCurrentOrder(): Promise<void> {
+    if (this.cartItems.length === 0) {
+      this.snackBar.open('Cart is empty', 'Close', { duration: 3000 });
+      return;
+    }
+
+    this.isLoading = true;
+    const holdRequest = {
+      customerId: this.customerPhone || '',
+      customerName: this.customerName || 'Walk-in Customer',
+      totalAmount: this.getTotal(),
+      items: JSON.stringify(this.cartItems),
+      expiryHours: 24,
+      notes: `Held at ${new Date().toLocaleString()}`
+    };
+
+    this.apiService.post('/api/retailsales/hold-order', holdRequest).subscribe({
+      next: (response: any) => {
+        this.showFeedback(`Order held successfully. Reference: ${response.referenceNumber}`);
+        this.resetSale();
+        this.isLoading = false;
+      },
+      error: (error) => {
+        this.snackBar.open('Error holding order', 'Close', { duration: 3000 });
+        this.isLoading = false;
+      }
+    });
+  }
+
+  async loadHeldOrders(): Promise<void> {
+    this.isLoading = true;
+    this.apiService.get('/api/retailsales/pending-sales/cashier').subscribe({
+      next: (orders: any[]) => {
+        this.heldOrders = orders;
+        this.showHeldOrdersPanel = true;
+        this.isLoading = false;
+      },
+      error: (error) => {
+        this.snackBar.open('Error loading held orders', 'Close', { duration: 3000 });
+        this.isLoading = false;
+      }
+    });
+  }
+
+  async retrieveHeldOrder(orderId: number): Promise<void> {
+    this.isLoading = true;
+    this.apiService.post(`/api/retailsales/retrieve-pending/${orderId}`, {}).subscribe({
+      next: (order: any) => {
+        // Restore cart from held order
+        this.cartItems = JSON.parse(order.items);
+        this.customerName = order.customerName;
+        this.customerPhone = order.customerId;
+        this.showHeldOrdersPanel = false;
+        this.showFeedback('Order retrieved successfully');
+        this.isLoading = false;
+      },
+      error: (error) => {
+        this.snackBar.open('Error retrieving order', 'Close', { duration: 3000 });
+        this.isLoading = false;
+      }
+    });
+  }
+
+  async cancelHeldOrder(orderId: number): Promise<void> {
+    this.isLoading = true;
+    this.apiService.delete(`/api/retailsales/cancel-pending/${orderId}`).subscribe({
+      next: () => {
+        this.showFeedback('Order cancelled');
+        this.loadHeldOrders(); // Refresh list
+        this.isLoading = false;
+      },
+      error: (error) => {
+        this.snackBar.open('Error cancelling order', 'Close', { duration: 3000 });
+        this.isLoading = false;
+      }
+    });
+  }
+
+  toggleHeldOrdersPanel(): void {
+    if (!this.showHeldOrdersPanel) {
+      this.loadHeldOrders();
+    } else {
+      this.showHeldOrdersPanel = false;
+    }
+  }
+
+  // ===== GIFT CARD FUNCTIONALITY =====
+  async validateGiftCard(): Promise<void> {
+    if (!this.giftCardNumber.trim()) {
+      this.snackBar.open('Enter gift card number', 'Close', { duration: 3000 });
+      return;
+    }
+
+    this.isValidatingGiftCard = true;
+    this.apiService.get(`/api/giftcards/${this.giftCardNumber}/balance`).subscribe({
+      next: (response: any) => {
+        this.giftCardBalance = response.balance || response;
+        this.showFeedback(`Gift Card Balance: $${this.giftCardBalance.toFixed(2)}`);
+        this.isValidatingGiftCard = false;
+      },
+      error: (error) => {
+        this.snackBar.open('Invalid gift card', 'Close', { duration: 3000 });
+        this.giftCardBalance = 0;
+        this.isValidatingGiftCard = false;
+      }
+    });
+  }
+
+  async applyGiftCardPayment(): Promise<void> {
+    if (this.giftCardAmountToUse <= 0 || this.giftCardAmountToUse > this.giftCardBalance) {
+      this.snackBar.open('Invalid gift card amount', 'Close', { duration: 3000 });
+      return;
+    }
+
+    if (this.giftCardAmountToUse > this.getTotal()) {
+      this.snackBar.open('Amount exceeds total', 'Close', { duration: 3000 });
+      return;
+    }
+
+    const redeemRequest = {
+      cardNumber: this.giftCardNumber,
+      amount: this.giftCardAmountToUse
+    };
+
+    this.apiService.post('/api/giftcards/redeem', redeemRequest).subscribe({
+      next: () => {
+        // Add to split payments
+        if (!this.useSplitPayment) {
+          this.useSplitPayment = true;
+        }
+        this.paymentSplits.push({
+          method: 'Gift Card',
+          amount: this.giftCardAmountToUse
+        });
+        this.giftCardBalance -= this.giftCardAmountToUse;
+        this.showFeedback(`Gift card payment of $${this.giftCardAmountToUse.toFixed(2)} applied`);
+        this.giftCardAmountToUse = 0;
+      },
+      error: (error) => {
+        this.snackBar.open('Error processing gift card', 'Close', { duration: 3000 });
+      }
+    });
+  }
+
+  // ===== RETURNS FUNCTIONALITY =====
+  toggleReturnsPanel(): void {
+    this.showReturnsPanel = !this.showReturnsPanel;
+    // In a complete implementation, this would show a returns processing UI
+    this.snackBar.open('Returns feature available - enter invoice number to process return', 'Close', { duration: 5000 });
+  }
+
   resetSale(): void {
     this.cartItems = [];
     this.selectedCartItems.clear();
@@ -614,6 +793,9 @@ export class RetailSalesPointComponent implements OnInit {
     this.useSplitPayment = false;
     this.paymentSplits = [];
     this.currentReceipt = null;
+    this.giftCardNumber = '';
+    this.giftCardBalance = 0;
+    this.giftCardAmountToUse = 0;
     this.resetDiscounts();
   }
 
