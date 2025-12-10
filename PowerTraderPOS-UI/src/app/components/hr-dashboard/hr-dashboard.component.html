@@ -1,0 +1,26 @@
+<mat-toolbar color="primary">
+  <span>HR Dashboard - {{currentUser?.fullName}}</span>
+  <span class="spacer"></span>
+  <button mat-raised-button color="accent" (click)="logout()">Logout</button>
+</mat-toolbar>
+<div class="dashboard-container">
+  <h1>HR Dashboard</h1>
+  <div class="dashboard-grid">
+    <mat-card>
+      <mat-card-header><mat-card-title>Employee Management</mat-card-title></mat-card-header>
+      <mat-card-content><p>Manage employee records</p></mat-card-content>
+    </mat-card>
+    <mat-card>
+      <mat-card-header><mat-card-title>Attendance</mat-card-title></mat-card-header>
+      <mat-card-content><p>Track employee attendance</p></mat-card-content>
+    </mat-card>
+    <mat-card>
+      <mat-card-header><mat-card-title>Payroll</mat-card-title></mat-card-header>
+      <mat-card-content><p>Process payroll</p></mat-card-content>
+    </mat-card>
+    <mat-card>
+      <mat-card-header><mat-card-title>Performance</mat-card-title></mat-card-header>
+      <mat-card-content><p>Employee performance reviews</p></mat-card-content>
+    </mat-card>
+  </div>
+</div>
