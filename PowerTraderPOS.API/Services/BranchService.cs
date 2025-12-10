@@ -30,11 +30,9 @@ namespace PowerTraderPOS.API.Services
                     Country = b.Country,
                     OfficePhone = b.OfficePhone,
                     CellPhone = b.CellPhone,
-                    Fax = b.Fax,
+                    // Fax property doesn't exist in BranchDto
                     Email = b.Email,
-                    Website = b.Website,
-                    Remarks = b.Remarks,
-                    TIN = b.TIN,
+                    // Website, Remarks, TIN properties don't exist in BranchDto
                     BranchName = b.BranchName,
                     Branchcode = b.Branchcode
                 })
@@ -58,11 +56,9 @@ namespace PowerTraderPOS.API.Services
                 Country = branch.Country,
                 OfficePhone = branch.OfficePhone,
                 CellPhone = branch.CellPhone,
-                Fax = branch.Fax,
+                // Fax property doesn't exist in BranchDto
                 Email = branch.Email,
-                Website = branch.Website,
-                Remarks = branch.Remarks,
-                TIN = branch.TIN,
+                // Website, Remarks, TIN properties don't exist in BranchDto
                 BranchName = branch.BranchName,
                 Branchcode = branch.Branchcode
             };
@@ -80,8 +76,8 @@ namespace PowerTraderPOS.API.Services
                 City = dto.City,
                 Country = dto.Country,
                 OfficePhone = dto.OfficePhone,
-                Email = dto.Email,
-                TIN = dto.TIN
+                Email = dto.Email
+                // TIN property doesn't exist in CreateBranchDto
             };
 
             _context.Branches.Add(branch);
@@ -102,8 +98,7 @@ namespace PowerTraderPOS.API.Services
             if (dto.OfficePhone != null) branch.OfficePhone = dto.OfficePhone;
             if (dto.CellPhone != null) branch.CellPhone = dto.CellPhone;
             if (dto.Email != null) branch.Email = dto.Email;
-            if (dto.Website != null) branch.Website = dto.Website;
-            if (dto.Remarks != null) branch.Remarks = dto.Remarks;
+            // Website and Remarks properties don't exist in UpdateBranchDto
 
             await _context.SaveChangesAsync();
             return await GetBranchByIdAsync(id);

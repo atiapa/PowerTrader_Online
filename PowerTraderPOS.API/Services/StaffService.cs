@@ -93,7 +93,7 @@ namespace PowerTraderPOS.API.Services
                 Department = dto.Department,
                 OrganisationName = dto.OrganisationName,
                 BranchName = dto.BranchName,
-                EntryDate = DateTime.UtcNow,
+                // EntryDate property doesn't exist in simplified model
                 IsActive = true
             };
 

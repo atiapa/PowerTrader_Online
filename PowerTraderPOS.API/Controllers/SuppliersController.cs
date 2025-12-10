@@ -52,7 +52,7 @@ namespace PowerTraderPOS.API.Controllers
                 return BadRequest(ModelState);
 
             var supplier = await _supplierService.CreateSupplierAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id = supplier.SNo }, supplier);
+            return CreatedAtAction(nameof(GetById), new { id = supplier.SupplierId }, supplier);
         }
 
         [Authorize(Roles = "Admin,Suppliers")]

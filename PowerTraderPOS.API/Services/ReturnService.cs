@@ -75,10 +75,7 @@ namespace PowerTraderPOS.API.Services
         /// </summary>
         public async Task<ReturnTransactionDto?> GetReturnByIdAsync(int returnId)
         {
-            var returnTransaction = await GetByIdWithTenantFilterAsync<ReturnTransactions, int>(
-                returnId,
-                r => r.ReturnId == returnId
-            );
+            var returnTransaction = await GetByIdWithTenantFilterAsync<ReturnTransactions, int>(returnId);
 
             return returnTransaction != null ? MapToDto(returnTransaction) : null;
         }
