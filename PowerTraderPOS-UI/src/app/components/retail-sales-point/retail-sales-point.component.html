@@ -1,0 +1,255 @@
+<!-- Main POS Container -->
+<div class="pos-container">
+  <!-- Header Toolbar -->
+  <mat-toolbar color="primary" class="pos-header">
+    <span class="header-title">
+      <mat-icon>point_of_sale</mat-icon>
+      Retail Sales Point
+    </span>
+    <span class="spacer"></span>
+    <span class="user-info" *ngIf="currentUser">
+      <mat-icon>person</mat-icon>
+      {{ currentUser.username }}
+    </span>
+    <button mat-icon-button (click)="logout()" class="logout-btn">
+      <mat-icon>logout</mat-icon>
+    </button>
+  </mat-toolbar>
+
+  <!-- Main Content Area -->
+  <div class="pos-main">
+    <!-- Left Panel: Products -->
+    <div class="products-panel">
+      <!-- Search and Filter Bar -->
+      <div class="search-filter-bar">
+        <mat-form-field class="search-field" appearance="outline">
+          <mat-label>Search Product</mat-label>
+          <input matInput 
+                 [(ngModel)]="searchTerm" 
+                 (ngModelChange)="onSearchChange()"
+                 placeholder="Search by name or code">
+          <mat-icon matPrefix>search</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field class="barcode-field" appearance="outline">
+          <mat-label>Scan Barcode</mat-label>
+          <input matInput 
+                 [(ngModel)]="barcodeInput"
+                 (keyup.enter)="onBarcodeSearch()"
+                 placeholder="Scan or enter barcode">
+          <mat-icon matPrefix>qr_code_scanner</mat-icon>
+        </mat-form-field>
+      </div>
+
+      <!-- Category Filter Chips -->
+      <div class="category-filters">
+        <mat-chip-set>
+          <mat-chip 
+            *ngFor="let category of categories"
+            [class.selected]="selectedCategoryId === category.id"
+            (click)="onCategoryChange(category.id)">
+            {{ category.name }}
+          </mat-chip>
+        </mat-chip-set>
+      </div>
+
+      <!-- Products Grid -->
+      <div class="products-grid" *ngIf="!isLoading">
+        <mat-card 
+          *ngFor="let product of filteredProducts" 
+          class="product-card"
+          (click)="addProductToCart(product)">
+          <div class="product-image">
+            <mat-icon class="product-icon">inventory_2</mat-icon>
+          </div>
+          <mat-card-content>
+            <h3 class="product-name">{{ product.name }}</h3>
+            <p class="product-code">{{ product.code }}</p>
+            <p class="product-price">${{ product.price | number:'1.2-2' }}</p>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <!-- Loading State -->
+      <div class="loading-state" *ngIf="isLoading">
+        <mat-icon class="spinning">refresh</mat-icon>
+        <p>Loading products...</p>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state" *ngIf="!isLoading && filteredProducts.length === 0">
+        <mat-icon>inventory_2</mat-icon>
+        <p>No products found</p>
+      </div>
+    </div>
+
+    <!-- Right Panel: Cart -->
+    <div class="cart-panel">
+      <div class="cart-header">
+        <h2>
+          <mat-icon>shopping_cart</mat-icon>
+          Shopping Cart
+          <span class="cart-badge" *ngIf="cartItems.length > 0">
+            {{ getCartItemCount() }}
+          </span>
+        </h2>
+      </div>
+
+      <!-- Numeric Keypad -->
+      <div class="numeric-keypad">
+        <span class="keypad-label">Quantity:</span>
+        <div class="keypad-buttons">
+          <button mat-raised-button (click)="setQuantity(1)" [class.active]="quantity === 1">1</button>
+          <button mat-raised-button (click)="setQuantity(2)" [class.active]="quantity === 2">2</button>
+          <button mat-raised-button (click)="setQuantity(5)" [class.active]="quantity === 5">5</button>
+          <button mat-raised-button (click)="setQuantity(10)" [class.active]="quantity === 10">10</button>
+        </div>
+      </div>
+
+      <!-- Cart Items -->
+      <div class="cart-items">
+        <div *ngIf="cartItems.length === 0" class="empty-cart">
+          <mat-icon>remove_shopping_cart</mat-icon>
+          <p>Cart is empty</p>
+          <p class="hint">Click on products to add them</p>
+        </div>
+
+        <mat-card *ngFor="let item of cartItems" class="cart-item">
+          <div class="item-details">
+            <h4>{{ item.productName }}</h4>
+            <p class="item-code">{{ item.productCode }}</p>
+          </div>
+          <div class="item-quantity">
+            <button mat-icon-button (click)="updateQuantity(item, -1)" class="qty-btn">
+              <mat-icon>remove</mat-icon>
+            </button>
+            <span class="qty-value">{{ item.quantity }}</span>
+            <button mat-icon-button (click)="updateQuantity(item, 1)" class="qty-btn">
+              <mat-icon>add</mat-icon>
+            </button>
+          </div>
+          <div class="item-price">
+            <p class="unit-price">${{ item.unitPrice | number:'1.2-2' }} each</p>
+            <p class="total-price">${{ item.totalPrice | number:'1.2-2' }}</p>
+          </div>
+          <button mat-icon-button (click)="removeFromCart(item)" class="remove-btn">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </mat-card>
+      </div>
+
+      <!-- Cart Summary -->
+      <div class="cart-summary" *ngIf="cartItems.length > 0">
+        <div class="summary-row">
+          <span>Subtotal:</span>
+          <span class="amount">${{ getSubtotal() | number:'1.2-2' }}</span>
+        </div>
+        <div class="summary-row">
+          <span>Tax (10%):</span>
+          <span class="amount">${{ getTax() | number:'1.2-2' }}</span>
+        </div>
+        <div class="summary-row total">
+          <span>Total:</span>
+          <span class="amount">${{ getTotal() | number:'1.2-2' }}</span>
+        </div>
+      </div>
+
+      <!-- Cart Actions -->
+      <div class="cart-actions" *ngIf="cartItems.length > 0">
+        <button mat-stroked-button (click)="clearCart()" class="clear-btn">
+          <mat-icon>clear_all</mat-icon>
+          Clear Cart
+        </button>
+        <button mat-raised-button color="primary" (click)="openCheckout()" class="checkout-btn">
+          <mat-icon>payment</mat-icon>
+          Checkout
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Checkout Modal -->
+  <div class="checkout-modal" *ngIf="showCheckout">
+    <div class="checkout-overlay" (click)="closeCheckout()"></div>
+    <mat-card class="checkout-card">
+      <mat-card-header>
+        <h2>
+          <mat-icon>payment</mat-icon>
+          Checkout
+        </h2>
+        <button mat-icon-button (click)="closeCheckout()" class="close-btn">
+          <mat-icon>close</mat-icon>
+        </button>
+      </mat-card-header>
+
+      <mat-card-content>
+        <!-- Customer Information -->
+        <div class="checkout-section">
+          <h3>Customer Information (Optional)</h3>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Customer Name</mat-label>
+            <input matInput [(ngModel)]="customerName">
+            <mat-icon matPrefix>person</mat-icon>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Phone Number</mat-label>
+            <input matInput [(ngModel)]="customerPhone">
+            <mat-icon matPrefix>phone</mat-icon>
+          </mat-form-field>
+        </div>
+
+        <!-- Payment Method -->
+        <div class="checkout-section">
+          <h3>Payment Method</h3>
+          <div class="payment-methods">
+            <button 
+              mat-raised-button 
+              *ngFor="let method of paymentMethods"
+              [color]="paymentMethod === method ? 'primary' : ''"
+              (click)="paymentMethod = method"
+              class="payment-btn">
+              <mat-icon>
+                {{ method === 'Cash' ? 'payments' : method === 'Card' ? 'credit_card' : 'phone_android' }}
+              </mat-icon>
+              {{ method }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="checkout-section">
+          <h3>Order Summary</h3>
+          <div class="order-summary">
+            <div class="summary-row">
+              <span>Items ({{ getCartItemCount() }}):</span>
+              <span>${{ getSubtotal() | number:'1.2-2' }}</span>
+            </div>
+            <div class="summary-row">
+              <span>Tax:</span>
+              <span>${{ getTax() | number:'1.2-2' }}</span>
+            </div>
+            <div class="summary-row total-row">
+              <span>Total Amount:</span>
+              <span>${{ getTotal() | number:'1.2-2' }}</span>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+
+      <mat-card-actions>
+        <button mat-stroked-button (click)="closeCheckout()" [disabled]="isLoading">
+          Cancel
+        </button>
+        <button 
+          mat-raised-button 
+          color="primary" 
+          (click)="completeSale()"
+          [disabled]="isLoading"
+          class="complete-btn">
+          <mat-icon>check_circle</mat-icon>
+          {{ isLoading ? 'Processing...' : 'Complete Sale' }}
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+</div>
