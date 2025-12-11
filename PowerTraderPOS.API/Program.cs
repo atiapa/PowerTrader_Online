@@ -17,6 +17,7 @@ builder.Services.AddHttpContextAccessor();
 
 // Register Multi-Tenant Infrastructure Services
 builder.Services.AddScoped<IUserContextService, UserContextService>();
+builder.Services.AddScoped<ITenantService, TenantService>();
 
 // Register Business Services
 builder.Services.AddScoped<IProductService, ProductService>();
