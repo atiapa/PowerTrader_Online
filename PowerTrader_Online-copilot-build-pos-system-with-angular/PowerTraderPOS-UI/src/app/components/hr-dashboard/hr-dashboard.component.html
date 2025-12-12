@@ -1,0 +1,46 @@
+<mat-toolbar color="primary">
+  <span>HR Dashboard - {{currentUser?.fullName}}</span>
+  <span class="spacer"></span>
+  <button mat-raised-button color="accent" (click)="logout()">Logout</button>
+</mat-toolbar>
+<div class="dashboard-container">
+  <h1>HR Dashboard</h1>
+  <div class="dashboard-grid">
+    <mat-card>
+      <mat-card-header><mat-card-title>Employee Management</mat-card-title></mat-card-header>
+      <mat-card-content><p>Manage employee records</p></mat-card-content>
+    </mat-card>
+    <mat-card>
+      <mat-card-header><mat-card-title>Attendance</mat-card-title></mat-card-header>
+      <mat-card-content><p>Track employee attendance</p></mat-card-content>
+    </mat-card>
+    <mat-card>
+      <mat-card-header><mat-card-title>Payroll</mat-card-title></mat-card-header>
+      <mat-card-content><p>Process payroll</p></mat-card-content>
+    </mat-card>
+    <mat-card>
+      <mat-card-header><mat-card-title>Performance</mat-card-title></mat-card-header>
+      <mat-card-content><p>Employee performance reviews</p></mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Floating Action Button -->
+  <button mat-fab class="fab-add" color="primary" [matMenuTriggerFor]="hrMenu" matTooltip="Quick Actions">
+    <mat-icon>add</mat-icon>
+  </button>
+
+  <mat-menu #hrMenu="matMenu">
+    <button mat-menu-item (click)="addEmployee()">
+      <mat-icon>person_add</mat-icon>
+      <span>Add Employee</span>
+    </button>
+    <button mat-menu-item (click)="recordAttendance()">
+      <mat-icon>event_available</mat-icon>
+      <span>Record Attendance</span>
+    </button>
+    <button mat-menu-item (click)="createLeaveRequest()">
+      <mat-icon>event_busy</mat-icon>
+      <span>Leave Request</span>
+    </button>
+  </mat-menu>
+</div>

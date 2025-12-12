@@ -1,0 +1,1096 @@
+// ============================================
+// RECEIVE SUPPLIES - PREMIUM DESIGN SYSTEM
+// Purple Gradient Theme with Glassmorphism
+// ============================================
+
+// Modern Color Palette
+$primary-purple: #667eea;
+$secondary-purple: #764ba2;
+$gradient-start: #667eea;
+$gradient-end: #764ba2;
+$success-green: #10b981;
+$warning-orange: #f59e0b;
+$error-red: #ef4444;
+$info-blue: #3b82f6;
+$light-bg: #f8fafc;
+$white: #ffffff;
+$text-dark: #1e293b;
+$text-muted: #64748b;
+$border-light: #e2e8f0;
+
+// Container
+.receive-supplies-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+  padding: 0;
+  margin: 0;
+  overflow-x: hidden;
+}
+
+// ============================================
+// STUNNING HEADER WITH GLASSMORPHISM
+// ============================================
+.header-section {
+  background: linear-gradient(135deg, $gradient-start 0%, $gradient-end 100%);
+  padding: 3rem 2rem;
+  position: relative;
+  overflow: hidden;
+  animation: slideDown 0.6s ease-out;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 500px;
+    height: 500px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    position: relative;
+    z-index: 1;
+
+    .icon-badge {
+      width: 80px;
+      height: 80px;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      animation: scaleIn 0.5s ease-out 0.2s both;
+
+      .large-icon {
+        font-size: 48px;
+        width: 48px;
+        height: 48px;
+        color: $white;
+      }
+    }
+
+    .header-text {
+      flex: 1;
+      animation: slideRight 0.6s ease-out 0.3s both;
+
+      .main-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: $white;
+        margin: 0;
+        letter-spacing: -0.5px;
+      }
+
+      .subtitle {
+        font-size: 1.1rem;
+        color: rgba(255, 255, 255, 0.9);
+        margin: 0.5rem 0 0;
+        font-weight: 400;
+      }
+    }
+  }
+
+  .header-meta-cards {
+    max-width: 1200px;
+    margin: 2rem auto 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    position: relative;
+    z-index: 1;
+
+    .meta-card {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 16px;
+      padding: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      transition: all 0.3s ease;
+      animation: fadeInUp 0.5s ease-out 0.4s both;
+
+      &:hover {
+        transform: translateY(-5px);
+        background: rgba(255, 255, 255, 0.25);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+      }
+
+      mat-icon {
+        color: $white;
+        font-size: 32px;
+        width: 32px;
+        height: 32px;
+      }
+
+      .meta-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+
+        .meta-label {
+          font-size: 0.875rem;
+          color: rgba(255, 255, 255, 0.8);
+          font-weight: 500;
+        }
+
+        .meta-value {
+          font-size: 1.25rem;
+          color: $white;
+          font-weight: 700;
+        }
+      }
+    }
+  }
+}
+
+// ============================================
+// CONTENT WRAPPER
+// ============================================
+.content-wrapper {
+  max-width: 1200px;
+  margin: -2rem auto 0;
+  padding: 0 2rem 4rem;
+  position: relative;
+  z-index: 2;
+}
+
+// ============================================
+// ELEVATED CARDS (Shared Styles)
+// ============================================
+.elevated-card {
+  background: $white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  margin-bottom: 2rem;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  animation: fadeInUp 0.5s ease-out both;
+
+  &:hover {
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+  }
+
+  .card-header {
+    padding: 1.5rem 2rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-bottom: 1px solid $border-light;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: $text-dark;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+
+      mat-icon {
+        color: $primary-purple;
+      }
+    }
+
+    .header-stats {
+      display: flex;
+      gap: 1rem;
+
+      .stat-chip {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: $white;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: $text-dark;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+        mat-icon {
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+          color: $primary-purple;
+        }
+
+        &.amount {
+          background: linear-gradient(135deg, $gradient-start, $gradient-end);
+          color: $white;
+
+          mat-icon {
+            color: $white;
+          }
+        }
+      }
+    }
+  }
+
+  .card-content {
+    padding: 2rem;
+  }
+}
+
+// ============================================
+// FORM GRIDS
+// ============================================
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.item-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+}
+
+// Material Form Fields
+::ng-deep {
+  .mat-mdc-form-field {
+    width: 100%;
+
+    &.mat-form-field-appearance-outline {
+      .mat-mdc-text-field-wrapper {
+        .mat-mdc-form-field-flex {
+          .mat-mdc-notched-outline {
+            border-color: $border-light;
+            transition: all 0.3s ease;
+          }
+        }
+      }
+
+      &.mat-focused {
+        .mat-mdc-notched-outline {
+          border-color: $primary-purple !important;
+          border-width: 2px;
+        }
+      }
+    }
+  }
+}
+
+// ============================================
+// INVOICE UPLOAD ZONE
+// ============================================
+.upload-zone {
+  border: 3px dashed $border-light;
+  border-radius: 16px;
+  padding: 3rem 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+
+  &:hover {
+    border-color: $primary-purple;
+    background: linear-gradient(135deg, #f1f5f9 0%, #e0e7ff 100%);
+    transform: scale(1.02);
+  }
+
+  &.dragging {
+    border-color: $success-green;
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+    transform: scale(1.05);
+  }
+
+  .upload-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    color: $primary-purple;
+    margin-bottom: 1rem;
+    animation: bounce 2s infinite;
+  }
+
+  h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: $text-dark;
+    margin: 0.5rem 0;
+  }
+
+  p {
+    font-size: 1rem;
+    color: $text-muted;
+    margin: 0.5rem 0;
+  }
+
+  .file-info {
+    display: inline-block;
+    margin-top: 1rem;
+    padding: 0.5rem 1rem;
+    background: rgba(102, 126, 234, 0.1);
+    border-radius: 20px;
+    font-size: 0.875rem;
+    color: $primary-purple;
+    font-weight: 500;
+  }
+}
+
+// Uploaded Invoice Preview
+.uploaded-invoice {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 2rem;
+  align-items: start;
+
+  .invoice-preview {
+    width: 200px;
+    height: 250px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    background: $light-bg;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .pdf-preview {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+
+      mat-icon {
+        font-size: 64px;
+        width: 64px;
+        height: 64px;
+        color: $error-red;
+        margin-bottom: 0.5rem;
+      }
+
+      span {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: $error-red;
+      }
+    }
+  }
+
+  .invoice-info {
+    h4 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: $text-dark;
+      margin: 0 0 0.5rem;
+    }
+
+    .file-size, .upload-date {
+      font-size: 0.875rem;
+      color: $text-muted;
+      margin: 0.25rem 0;
+    }
+
+    .invoice-actions {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+      flex-wrap: wrap;
+
+      button {
+        mat-icon {
+          margin-right: 0.5rem;
+        }
+      }
+    }
+  }
+}
+
+// ============================================
+// ADD ITEM SECTION
+// ============================================
+.add-item-footer {
+  margin-top: 2rem;
+  text-align: right;
+
+  .add-item-btn {
+    padding: 0.75rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    background: linear-gradient(135deg, $gradient-start, $gradient-end);
+
+    mat-icon {
+      margin-right: 0.5rem;
+    }
+  }
+}
+
+// ============================================
+// SUPPLY ITEMS TABLE
+// ============================================
+.table-responsive {
+  overflow-x: auto;
+  margin-bottom: 2rem;
+}
+
+.supply-items-table {
+  width: 100%;
+  background: $white;
+
+  th {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    font-weight: 600;
+    color: $text-dark;
+    padding: 1rem;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  td {
+    padding: 1rem;
+    color: $text-dark;
+    font-size: 0.95rem;
+  }
+
+  .table-row {
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: rgba(102, 126, 234, 0.05);
+    }
+  }
+
+  .product-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+
+    mat-icon {
+      color: $primary-purple;
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+
+    span {
+      font-weight: 500;
+    }
+  }
+
+  .sku-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background: rgba(102, 126, 234, 0.1);
+    border-radius: 12px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: $primary-purple;
+  }
+
+  .quantity-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    padding: 0.375rem 0.75rem;
+    background: linear-gradient(135deg, $success-green, #059669);
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: $white;
+  }
+}
+
+// ============================================
+// TOTALS SECTION
+// ============================================
+.totals-section {
+  border-top: 2px solid $border-light;
+  padding-top: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.totals-grid {
+  max-width: 400px;
+  margin-left: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+
+  .total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+
+    .total-label {
+      font-size: 1rem;
+      color: $text-muted;
+      font-weight: 500;
+    }
+
+    .total-value {
+      font-size: 1.125rem;
+      color: $text-dark;
+      font-weight: 600;
+    }
+
+    &.grand-total {
+      border-top: 2px solid $primary-purple;
+      padding-top: 1rem;
+      margin-top: 0.5rem;
+
+      .total-label {
+        font-size: 1.25rem;
+        color: $text-dark;
+        font-weight: 700;
+      }
+
+      .total-value {
+        font-size: 1.5rem;
+        color: $primary-purple;
+        font-weight: 700;
+      }
+    }
+  }
+}
+
+// ============================================
+// EMPTY STATE
+// ============================================
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+
+  mat-icon {
+    font-size: 80px;
+    width: 80px;
+    height: 80px;
+    color: $text-muted;
+    opacity: 0.5;
+    margin-bottom: 1rem;
+  }
+
+  h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: $text-dark;
+    margin: 0.5rem 0;
+  }
+
+  p {
+    font-size: 1rem;
+    color: $text-muted;
+    margin: 0;
+  }
+}
+
+// ============================================
+// ACTION BUTTONS
+// ============================================
+.action-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding: 2rem;
+  background: $white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  margin-top: 2rem;
+  animation: fadeInUp 0.5s ease-out 0.6s both;
+
+  button {
+    padding: 0.875rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+
+    mat-icon {
+      margin-right: 0.5rem;
+    }
+
+    &:hover {
+      transform: translateY(-2px);
+    }
+  }
+
+  // Ghost Button (Clear All)
+  .ghost-btn {
+    background: transparent;
+    color: $text-muted;
+    border: none;
+
+    &:hover {
+      background: rgba(239, 68, 68, 0.05);
+      color: $error-red;
+    }
+  }
+
+  // Outlined Button (Print Report)
+  .outlined-btn {
+    background: $white;
+    border: 2px solid $primary-purple;
+    color: $primary-purple;
+
+    &:hover {
+      background: rgba(102, 126, 234, 0.1);
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+  }
+
+  // Gradient Button (Save Receipt)
+  .gradient-btn {
+    background: linear-gradient(135deg, $gradient-start, $gradient-end);
+    color: $white;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+
+    &:hover {
+      box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);
+      transform: translateY(-3px);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+  }
+}
+
+// ============================================
+// PRINT PREVIEW MODAL
+// ============================================
+.print-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.print-modal {
+  background: $white;
+  border-radius: 16px;
+  max-width: 900px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.4s ease-out;
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 2rem;
+    border-bottom: 2px solid $border-light;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+
+    h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: $text-dark;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+
+      mat-icon {
+        color: $primary-purple;
+      }
+    }
+  }
+
+  .print-content {
+    padding: 3rem;
+    background: $white;
+  }
+
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding: 1.5rem 2rem;
+    border-top: 2px solid $border-light;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  }
+}
+
+// ============================================
+// PRINT STYLES
+// ============================================
+.print-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  padding-bottom: 2rem;
+  border-bottom: 3px solid $primary-purple;
+  margin-bottom: 2rem;
+
+  .company-info {
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: $primary-purple;
+      margin: 0 0 0.5rem;
+    }
+
+    p {
+      font-size: 1rem;
+      color: $text-muted;
+      margin: 0;
+    }
+  }
+
+  .document-info {
+    text-align: right;
+
+    h2 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: $text-dark;
+      margin: 0 0 0.5rem;
+    }
+
+    p {
+      font-size: 0.95rem;
+      color: $text-dark;
+      margin: 0.25rem 0;
+    }
+  }
+}
+
+.print-section {
+  margin-bottom: 2rem;
+
+  h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: $text-dark;
+    margin: 0 0 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid $border-light;
+  }
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+
+  .detail-item {
+    display: flex;
+    gap: 0.5rem;
+
+    .detail-label {
+      font-weight: 600;
+      color: $text-dark;
+    }
+
+    .detail-value {
+      color: $text-muted;
+    }
+  }
+}
+
+.print-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+
+  thead {
+    background: linear-gradient(135deg, $gradient-start, $gradient-end);
+
+    th {
+      padding: 0.75rem;
+      text-align: left;
+      color: $white;
+      font-weight: 600;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+    }
+  }
+
+  tbody {
+    tr {
+      border-bottom: 1px solid $border-light;
+
+      &:hover {
+        background: rgba(102, 126, 234, 0.05);
+      }
+
+      td {
+        padding: 0.75rem;
+        color: $text-dark;
+        font-size: 0.95rem;
+      }
+    }
+  }
+}
+
+.print-totals {
+  max-width: 400px;
+  margin-left: auto;
+  margin-top: 2rem;
+
+  .print-total-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    font-size: 1rem;
+
+    &.grand {
+      border-top: 3px solid $primary-purple;
+      padding-top: 1rem;
+      margin-top: 0.5rem;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: $primary-purple;
+    }
+  }
+}
+
+.print-footer {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 2px solid $border-light;
+  text-align: center;
+
+  p {
+    font-size: 0.95rem;
+    color: $text-muted;
+    margin: 0.5rem 0;
+  }
+
+  .signature-line {
+    width: 300px;
+    margin: 2rem auto 0.5rem;
+    border-bottom: 2px solid $text-dark;
+  }
+}
+
+// ============================================
+// PRINT MEDIA QUERY
+// ============================================
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  .print-modal {
+    box-shadow: none;
+    max-width: 100%;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .print-content {
+    padding: 0;
+  }
+
+  body {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}
+
+// ============================================
+// ANIMATIONS
+// ============================================
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideRight {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+// ============================================
+// RESPONSIVE DESIGN
+// ============================================
+@media (max-width: 1024px) {
+  .header-content {
+    flex-direction: column;
+    text-align: center;
+
+    .header-text .main-title {
+      font-size: 2rem;
+    }
+  }
+
+  .form-grid, .item-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .uploaded-invoice {
+    grid-template-columns: 1fr;
+    text-align: center;
+
+    .invoice-preview {
+      margin: 0 auto;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .header-section {
+    padding: 2rem 1rem;
+  }
+
+  .content-wrapper {
+    padding: 0 1rem 2rem;
+  }
+
+  .elevated-card .card-content {
+    padding: 1.5rem;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+
+    button {
+      width: 100%;
+    }
+  }
+
+  .header-meta-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .header-section .header-text .main-title {
+    font-size: 1.75rem;
+  }
+
+  .print-modal {
+    margin: 1rem;
+    max-height: 85vh;
+  }
+
+  .print-content {
+    padding: 1.5rem;
+  }
+
+  .details-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+// ============================================
+// SNACKBAR STYLES
+// ============================================
+::ng-deep {
+  .snackbar-success {
+    background: $success-green !important;
+    color: $white !important;
+  }
+
+  .snackbar-error {
+    background: $error-red !important;
+    color: $white !important;
+  }
+
+  .snackbar-warning {
+    background: $warning-orange !important;
+    color: $white !important;
+  }
+
+  .snackbar-info {
+    background: $info-blue !important;
+    color: $white !important;
+  }
+}

@@ -1,0 +1,280 @@
+@use '../../styles/dashboard-modern.scss' as *;
+@use 'sass:color';
+
+// ==========================================
+// SERVICE DASHBOARD - MODERN REDESIGN
+// ==========================================
+$service-primary: #30cfd0;
+$service-secondary: #330867;
+
+.service-dashboard-layout {
+  @include modern-dashboard-layout;
+  
+  &::before {
+    @include animated-background($service-primary, $service-secondary, color.adjust($service-primary, $lightness: 15%));
+  }
+}
+
+.main-content {
+  @include main-content;
+}
+
+.content-header {
+  @include content-header($service-primary, $service-secondary);
+}
+
+// Service Stats Cards
+.stats-grid {
+  margin-bottom: 32px;
+  animation: slideIn 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  @include responsive-grid(4, 24px);
+
+  .stat-card {
+    @include modern-stat-card;
+
+    &:nth-child(1) .stat-icon {
+      background: linear-gradient(135deg, #30cfd0, #330867);
+    }
+
+    &:nth-child(2) .stat-icon {
+      background: linear-gradient(135deg, #fa709a, #fee140);
+    }
+
+    &:nth-child(3) .stat-icon {
+      background: linear-gradient(135deg, #43e97b, #38f9d7);
+    }
+
+    &:nth-child(4) .stat-icon {
+      background: linear-gradient(135deg, #f093fb, #f5576c);
+    }
+  }
+}
+
+// Service Requests Grid
+.service-requests-grid {
+  margin-top: 32px;
+  @include responsive-grid(2, 24px);
+
+  .service-card {
+    @include glass-card;
+    padding: 28px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 16px 48px rgba($service-primary, 0.15);
+    }
+
+    .service-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+
+      h3 {
+        font-size: 20px;
+        font-weight: 600;
+        margin: 0;
+        color: #1e293b;
+      }
+
+      .priority-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+
+        &.high {
+          background: rgba(239, 68, 68, 0.1);
+          color: #dc2626;
+        }
+
+        &.medium {
+          background: rgba(245, 158, 11, 0.1);
+          color: #d97706;
+        }
+
+        &.low {
+          background: rgba(34, 197, 94, 0.1);
+          color: #16a34a;
+        }
+      }
+    }
+
+    .service-info {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+
+      .info-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        mat-icon {
+          color: $service-primary;
+          width: 20px;
+          height: 20px;
+          font-size: 20px;
+        }
+
+        .label {
+          flex: 1;
+          font-size: 14px;
+          color: #64748b;
+        }
+
+        .value {
+          font-weight: 600;
+          color: #334155;
+        }
+      }
+    }
+
+    .service-description {
+      font-size: 14px;
+      color: #64748b;
+      line-height: 1.6;
+      margin-bottom: 20px;
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: 8px;
+    }
+
+    .service-actions {
+      display: flex;
+      gap: 12px;
+
+      button {
+        flex: 1;
+        height: 40px;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+        &:first-child {
+          @include gradient-button($service-primary, $service-secondary);
+        }
+
+        &:last-child {
+          background: rgba($service-primary, 0.1);
+          color: $service-secondary;
+
+          &:hover {
+            background: rgba($service-primary, 0.2);
+          }
+        }
+      }
+    }
+  }
+}
+
+// Service Timeline
+.timeline-section {
+  @include glass-card;
+  padding: 32px;
+  margin-top: 24px;
+
+  h2 {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 24px 0;
+    background: linear-gradient(135deg, $service-primary, $service-secondary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .timeline {
+    position: relative;
+    padding-left: 40px;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 15px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(180deg, $service-primary, $service-secondary);
+    }
+
+    .timeline-item {
+      position: relative;
+      margin-bottom: 32px;
+
+      &::before {
+        content: '';
+        position: absolute;
+        left: -29px;
+        top: 8px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: white;
+        border: 3px solid $service-primary;
+        z-index: 1;
+      }
+
+      .timeline-content {
+        background: rgba(255, 255, 255, 0.5);
+        padding: 20px;
+        border-radius: 12px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+        &:hover {
+          background: rgba(255, 255, 255, 0.7);
+          transform: translateX(8px);
+        }
+
+        .timeline-date {
+          font-size: 12px;
+          color: #64748b;
+          margin-bottom: 8px;
+          font-weight: 600;
+        }
+
+        .timeline-title {
+          font-size: 16px;
+          font-weight: 600;
+          color: #1e293b;
+          margin-bottom: 8px;
+        }
+
+        .timeline-description {
+          font-size: 14px;
+          color: #64748b;
+          line-height: 1.5;
+        }
+      }
+    }
+  }
+}
+
+// Service Table
+.service-table {
+  @include modern-table;
+  margin-top: 32px;
+}
+
+// Floating Action Button
+.fab-add {
+  @include modern-fab($service-primary);
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .content-header {
+    padding: 28px 24px;
+
+    .header-info h1 {
+      font-size: 32px;
+    }
+  }
+
+  .service-requests-grid {
+    grid-template-columns: 1fr;
+  }
+}

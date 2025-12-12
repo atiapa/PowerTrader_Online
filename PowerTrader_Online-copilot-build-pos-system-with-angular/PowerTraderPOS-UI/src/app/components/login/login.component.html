@@ -1,0 +1,51 @@
+<div class="login-container">
+  <mat-card class="login-card">
+    <mat-card-header>
+      <mat-card-title>PowerTrader POS</mat-card-title>
+      <mat-card-subtitle>Enter Your 4-Digit PIN</mat-card-subtitle>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <div class="pin-display">
+        <div class="pin-dots">
+          @for (i of [0,1,2,3]; track i) {
+            <div class="pin-dot" [class.filled]="pin.length > i"></div>
+          }
+        </div>
+      </div>
+
+      <div class="pin-pad">
+        <mat-grid-list cols="3" rowHeight="80px" gutterSize="10px">
+          @for (num of [1,2,3,4,5,6,7,8,9]; track num) {
+            <mat-grid-tile>
+              <button mat-raised-button color="primary" class="pin-button" (click)="onPinInput(num.toString())">
+                {{num}}
+              </button>
+            </mat-grid-tile>
+          }
+          <mat-grid-tile>
+            <button mat-raised-button color="warn" class="pin-button" (click)="clearPin()">
+              Clear
+            </button>
+          </mat-grid-tile>
+          <mat-grid-tile>
+            <button mat-raised-button color="primary" class="pin-button" (click)="onPinInput('0')">
+              0
+            </button>
+          </mat-grid-tile>
+          <mat-grid-tile>
+            <button mat-raised-button color="accent" class="pin-button" (click)="deleteLastDigit()">
+              ⌫
+            </button>
+          </mat-grid-tile>
+        </mat-grid-list>
+      </div>
+
+      @if (loading) {
+        <div class="loading-message">
+          Authenticating...
+        </div>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

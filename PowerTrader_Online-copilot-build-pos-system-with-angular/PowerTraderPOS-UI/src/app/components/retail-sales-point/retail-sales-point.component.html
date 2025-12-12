@@ -1,0 +1,514 @@
+<div class="retail-sales-container">
+  <!-- Toolbar -->
+  <mat-toolbar color="primary" class="pos-toolbar">
+    <button mat-icon-button (click)="toggleHoldOrders()" [matBadge]="holdOrderCount" matBadgeColor="warn">
+      <mat-icon>shopping_cart</mat-icon>
+    </button>
+    <span class="toolbar-spacer"></span>
+    <span class="invoice-number">{{currentInvoiceNr}}</span>
+    <span class="toolbar-spacer"></span>
+    <button mat-icon-button (click)="toggleHighContrast()" matTooltip="High Contrast">
+      <mat-icon>contrast</mat-icon>
+    </button>
+  </mat-toolbar>
+
+  <!-- Main Split Layout -->
+  <div class="split-layout">
+    <!-- LEFT: Product Selection -->
+    <div class="products-section">
+      <!-- Search Bar -->
+      <div class="search-container">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-icon matPrefix>search</mat-icon>
+          <input matInput 
+                 #searchInput
+                 placeholder="Search products..." 
+                 [(ngModel)]="searchTerm"
+                 (ngModelChange)="onSearchChange($event)">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="barcode-field">
+          <mat-icon matPrefix>qr_code_scanner</mat-icon>
+          <input matInput 
+                 #barcodeInput
+                 placeholder="Scan barcode" 
+                 [(ngModel)]="barcodeSearch"
+                 (keyup.enter)="onBarcodeSearch()">
+        </mat-form-field>
+      </div>
+
+      <!-- Category Filters -->
+      <div class="category-filters">
+        <button mat-raised-button 
+                [color]="selectedCategory === null ? 'primary' : ''"
+                (click)="selectCategory(null)"
+                class="category-btn">
+          All Products
+        </button>
+        @for (category of categories; track category.categoryID) {
+          <button mat-raised-button 
+                  [color]="selectedCategory === category.categoryID ? 'primary' : ''"
+                  (click)="selectCategory(category.categoryID!)"
+                  class="category-btn">
+            {{category.categoryName}}
+          </button>
+        }
+      </div>
+
+      <!-- Sub-Category Filters -->
+      @if (subCategories.length > 0) {
+        <div class="subcategory-filters">
+          @for (subcat of subCategories; track subcat.refno) {
+            <mat-chip (click)="selectSubCategory(subcat.refno!)"
+                      [class.selected]="selectedSubCategory === subcat.refno">
+              {{subcat.subcategory}}
+            </mat-chip>
+          }
+        </div>
+      }
+
+      <!-- Products Grid -->
+      @if (loading) {
+        <div class="loading-container">
+          <mat-spinner></mat-spinner>
+        </div>
+      } @else {
+        <div class="products-grid">
+          @for (product of filteredProducts; track product.productID) {
+            <mat-card class="product-card" (click)="addToCart(product)">
+              @if (product.photo) {
+                <img mat-card-image [src]="product.photo" [alt]="product.productName">
+              } @else {
+                <div class="no-image">
+                  <mat-icon>image</mat-icon>
+                </div>
+              }
+              <mat-card-content>
+                <h3 class="product-name">{{product.productName}}</h3>
+                <p class="product-price">{{product.unitPrice | currency}}</p>
+                <p class="product-stock">Stock: {{product.unitsInStock}}</p>
+                
+                @if (product.discountPercentage && product.discountPercentage > 0) {
+                  <mat-chip color="warn">DISCOUNT {{product.discountPercentage}}%</mat-chip>
+                }
+                @if (checkPromotion(product)) {
+                  <mat-chip color="accent">PROMO</mat-chip>
+                }
+              </mat-card-content>
+            </mat-card>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- RIGHT: Cart & Checkout -->
+    <div class="cart-section">
+      <!-- Customer Selection -->
+      <mat-card class="customer-card">
+        @if (selectedCustomer) {
+          <div class="customer-info">
+            <div class="customer-details">
+              <mat-icon>person</mat-icon>
+              <div>
+                <strong>{{selectedCustomer.accountName || selectedCustomer.companyname}}</strong>
+                <p>{{selectedCustomer.phoneNr}}</p>
+              </div>
+            </div>
+            <button mat-icon-button (click)="clearCustomer()">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+          
+          @if (loyaltyPoints) {
+            <div class="loyalty-info">
+              <mat-icon>stars</mat-icon>
+              <span>{{loyaltyPoints.availablePoints}} points ({{loyaltyPoints.redeemableAmount | currency}})</span>
+              <mat-slide-toggle [(ngModel)]="redeemPoints" (change)="toggleRedeemPoints()">
+                Redeem
+              </mat-slide-toggle>
+            </div>
+          }
+        } @else {
+          <div class="customer-search">
+            <mat-form-field appearance="outline">
+              <mat-icon matPrefix>person_search</mat-icon>
+              <input matInput 
+                     placeholder="Search customer" 
+                     [(ngModel)]="customerSearch"
+                     (keyup.enter)="searchCustomer()">
+            </mat-form-field>
+            <button mat-raised-button color="primary" (click)="searchCustomer()">
+              Search
+            </button>
+          </div>
+        }
+      </mat-card>
+
+      <!-- Cart Items -->
+      <div class="cart-items-container">
+        @if (cartItems.length === 0) {
+          <div class="empty-cart">
+            <mat-icon>shopping_cart</mat-icon>
+            <p>Cart is empty</p>
+            <p class="hint">Tap products to add</p>
+          </div>
+        } @else {
+          <div class="cart-items-list">
+            @for (item of cartItems; track item.productId) {
+              <mat-card class="cart-item" [class.selected]="selectedCartItem === item">
+                <div class="item-header" (click)="selectCartItem(item)">
+                  <h4>{{item.productName}}</h4>
+                  <button mat-icon-button (click)="removeFromCart(item)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+                
+                <div class="item-details">
+                  <div class="quantity-controls">
+                    <button mat-mini-fab color="primary" (click)="updateQuantity(item, -1)">
+                      <mat-icon>remove</mat-icon>
+                    </button>
+                    <span class="quantity" (click)="openNumericKeypad('quantity', item)">
+                      {{item.quantity}}
+                    </span>
+                    <button mat-mini-fab color="primary" (click)="updateQuantity(item, 1)">
+                      <mat-icon>add</mat-icon>
+                    </button>
+                  </div>
+
+                  <div class="item-pricing">
+                    <p>{{item.unitPrice | currency}} × {{item.quantity}}</p>
+                    
+                    @if (item.discount > 0) {
+                      <mat-chip class="discount-chip" color="warn">
+                        -{{item.discount}}{{item.discountType === 'percentage' ? '%' : ''}}
+                      </mat-chip>
+                    }
+                    
+                    <button mat-icon-button (click)="openNumericKeypad('discount', item)">
+                      <mat-icon>local_offer</mat-icon>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="item-total">
+                  <strong>{{item.total | currency}}</strong>
+                </div>
+
+                @if (item.isClearance) {
+                  <mat-chip color="warn" class="badge-chip">CLEARANCE</mat-chip>
+                }
+                @if (item.isPromotion) {
+                  <mat-chip color="accent" class="badge-chip">PROMO</mat-chip>
+                }
+              </mat-card>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Cart Actions -->
+      <div class="cart-actions">
+        <button mat-raised-button (click)="holdOrder()" [disabled]="cartItems.length === 0">
+          <mat-icon>pause</mat-icon>
+          Hold Order
+        </button>
+        <button mat-raised-button (click)="clearCart()" [disabled]="cartItems.length === 0">
+          <mat-icon>clear_all</mat-icon>
+          Clear
+        </button>
+      </div>
+
+      <!-- Global Discount -->
+      <mat-card class="discount-card">
+        <h4>Global Discount</h4>
+        <div class="discount-controls">
+          <mat-form-field appearance="outline">
+            <input matInput type="number" [(ngModel)]="globalDiscount" placeholder="Discount">
+          </mat-form-field>
+          <mat-button-toggle-group [(ngModel)]="globalDiscountType">
+            <mat-button-toggle value="percentage">%</mat-button-toggle>
+            <mat-button-toggle value="fixed">$</mat-button-toggle>
+          </mat-button-toggle-group>
+          <button mat-raised-button color="accent" (click)="applyGlobalDiscount()">
+            Apply
+          </button>
+        </div>
+      </mat-card>
+
+      <!-- Totals -->
+      <mat-card class="totals-card">
+        <div class="total-row">
+          <span>Subtotal:</span>
+          <span>{{subtotal | currency}}</span>
+        </div>
+        <div class="total-row">
+          <span>Discount:</span>
+          <span class="discount-amount">-{{totalDiscount | currency}}</span>
+        </div>
+        @if (redeemPoints && pointsToRedeem > 0) {
+          <div class="total-row">
+            <span>Loyalty Points:</span>
+            <span class="discount-amount">-{{pointsToRedeem | currency}}</span>
+          </div>
+        }
+        <div class="total-row">
+          <span>Tax:</span>
+          <span>{{taxAmount | currency}}</span>
+        </div>
+        <mat-divider></mat-divider>
+        <div class="total-row grand-total">
+          <span>TOTAL:</span>
+          <span>{{grandTotal | currency}}</span>
+        </div>
+      </mat-card>
+
+      <!-- Checkout Button -->
+      <button mat-raised-button 
+              color="primary" 
+              class="checkout-btn"
+              (click)="openCheckout()"
+              [disabled]="cartItems.length === 0">
+        <mat-icon>payment</mat-icon>
+        CHECKOUT
+      </button>
+    </div>
+  </div>
+
+  <!-- Hold Orders Sidebar -->
+  @if (showHoldOrders) {
+    <div class="hold-orders-sidebar">
+      <div class="sidebar-header">
+        <h3>Hold Orders</h3>
+        <button mat-icon-button (click)="toggleHoldOrders()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <div class="hold-orders-list">
+        @if (holdOrders.length === 0) {
+          <p class="no-orders">No hold orders</p>
+        } @else {
+          @for (order of holdOrders; track order.holdNumber) {
+            <mat-card class="hold-order-card">
+              <div class="order-header">
+                <strong>{{order.holdNumber}}</strong>
+                <span class="order-time">{{order.timestamp | date:'short'}}</span>
+              </div>
+              @if (order.customer) {
+                <p class="order-customer">{{order.customer.accountName || order.customer.companyname}}</p>
+              }
+              <p class="order-total">{{order.total | currency}}</p>
+              <div class="order-actions">
+                <button mat-raised-button color="primary" (click)="retrieveHoldOrder(order)">
+                  Retrieve
+                </button>
+                <button mat-icon-button color="warn" (click)="deleteHoldOrder(order.holdNumber)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </mat-card>
+          }
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Checkout Modal -->
+  @if (showCheckout) {
+    <div class="checkout-overlay">
+      <mat-card class="checkout-modal">
+        <div class="modal-header">
+          <h2>Checkout</h2>
+          <button mat-icon-button (click)="closeCheckout()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+
+        <div class="checkout-content">
+          <!-- Order Summary -->
+          <div class="order-summary">
+            <h3>Order Summary</h3>
+            <div class="summary-row">
+              <span>Subtotal:</span>
+              <span>{{subtotal | currency}}</span>
+            </div>
+            <div class="summary-row">
+              <span>Discount:</span>
+              <span>-{{totalDiscount | currency}}</span>
+            </div>
+            <div class="summary-row">
+              <span>Tax:</span>
+              <span>{{taxAmount | currency}}</span>
+            </div>
+            <div class="summary-row grand">
+              <span>TOTAL:</span>
+              <span>{{grandTotal | currency}}</span>
+            </div>
+          </div>
+
+          <!-- Payment Methods -->
+          <div class="payment-methods">
+            <h3>Payment Method</h3>
+            <div class="payment-buttons">
+              <button mat-raised-button 
+                      class="payment-btn"
+                      (click)="addPaymentSplit('Cash')">
+                <mat-icon>payments</mat-icon>
+                Cash
+              </button>
+              <button mat-raised-button 
+                      class="payment-btn"
+                      (click)="addPaymentSplit('Card')">
+                <mat-icon>credit_card</mat-icon>
+                Card
+              </button>
+              <button mat-raised-button 
+                      class="payment-btn"
+                      (click)="addPaymentSplit('MobileMoney')">
+                <mat-icon>phone_android</mat-icon>
+                Mobile Money
+              </button>
+              <button mat-raised-button 
+                      class="payment-btn"
+                      (click)="addPaymentSplit('GiftCard')">
+                <mat-icon>card_giftcard</mat-icon>
+                Gift Card
+              </button>
+            </div>
+          </div>
+
+          <!-- Gift Card Validation -->
+          <div class="gift-card-section">
+            <mat-form-field appearance="outline">
+              <mat-icon matPrefix>card_giftcard</mat-icon>
+              <input matInput 
+                     placeholder="Gift card number" 
+                     [(ngModel)]="giftCardNumber">
+            </mat-form-field>
+            <button mat-raised-button (click)="validateGiftCard()">
+              Validate
+            </button>
+            @if (giftCardValidated) {
+              <p class="gift-card-balance">Balance: {{giftCardBalance | currency}}</p>
+            }
+          </div>
+
+          <!-- Payment Splits -->
+          @if (paymentSplits.length > 0) {
+            <div class="payment-splits">
+              <h4>Payments Received:</h4>
+              @for (split of paymentSplits; track $index; let i = $index) {
+                <div class="split-row">
+                  <mat-icon>{{split.method === 'Cash' ? 'payments' : split.method === 'Card' ? 'credit_card' : split.method === 'MobileMoney' ? 'phone_android' : 'card_giftcard'}}</mat-icon>
+                  <span>{{split.method}}</span>
+                  <span class="split-amount">{{split.amount | currency}}</span>
+                  <button mat-icon-button (click)="removePaymentSplit(i)">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                </div>
+              }
+            </div>
+          }
+
+          <!-- Payment Status -->
+          <div class="payment-status">
+            <div class="status-row">
+              <span>Amount Paid:</span>
+              <span class="paid-amount">{{amountPaid | currency}}</span>
+            </div>
+            <div class="status-row">
+              <span>Amount Due:</span>
+              <span class="due-amount">{{amountDue | currency}}</span>
+            </div>
+            @if (changeAmount > 0) {
+              <div class="status-row change">
+                <span>Change:</span>
+                <span class="change-amount">{{changeAmount | currency}}</span>
+              </div>
+            }
+          </div>
+
+          <!-- Receipt Options -->
+          <div class="receipt-options">
+            <h4>Receipt Options</h4>
+            <mat-form-field appearance="outline">
+              <mat-icon matPrefix>email</mat-icon>
+              <input matInput placeholder="Email" [(ngModel)]="receiptEmail">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-icon matPrefix>phone</mat-icon>
+              <input matInput placeholder="Phone" [(ngModel)]="receiptPhone">
+            </mat-form-field>
+          </div>
+
+          <!-- Complete Button -->
+          <button mat-raised-button 
+                  color="primary" 
+                  class="complete-sale-btn"
+                  (click)="completeSale()"
+                  [disabled]="amountDue > 0.01 || loading">
+            @if (loading) {
+              <mat-spinner diameter="20"></mat-spinner>
+            }
+            @if (!loading) {
+              <ng-container>
+                <mat-icon>check_circle</mat-icon>
+                COMPLETE SALE
+              </ng-container>
+            }
+          </button>
+        </div>
+      </mat-card>
+    </div>
+  }
+
+  <!-- Numeric Keypad -->
+  @if (showNumericKeypad) {
+    <div class="keypad-overlay">
+      <mat-card class="numeric-keypad">
+        <div class="keypad-header">
+          <h3>
+            @if (keypadMode === 'quantity') { Enter Quantity }
+            @if (keypadMode === 'discount') { Enter Discount % }
+            @if (keypadMode === 'payment') { Enter Amount }
+          </h3>
+          <button mat-icon-button (click)="closeNumericKeypad()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+
+        <div class="keypad-display">
+          {{numericInput || '0'}}
+        </div>
+
+        <div class="keypad-buttons">
+          @for (num of ['7','8','9','4','5','6','1','2','3','0','.','00']; track num) {
+            <button mat-raised-button 
+                    class="keypad-btn"
+                    (click)="numericKeyPress(num)">
+              {{num}}
+            </button>
+          }
+          <button mat-raised-button 
+                  color="warn"
+                  class="keypad-btn clear"
+                  (click)="numericKeyPress('clear')">
+            C
+          </button>
+          <button mat-raised-button 
+                  class="keypad-btn backspace"
+                  (click)="numericKeyPress('backspace')">
+            ⌫
+          </button>
+          <button mat-raised-button 
+                  color="primary"
+                  class="keypad-btn enter"
+                  (click)="numericKeyPress('enter')">
+            ✓
+          </button>
+        </div>
+      </mat-card>
+    </div>
+  }
+</div>

@@ -1,0 +1,253 @@
+<div class="pos-container">
+  <header class="pos-header">
+    <h1>Point of Sale</h1>
+    <div class="header-actions">
+      <span class="user-name">{{ currentUser()?.fullName }}</span>
+      <button class="btn btn-secondary" (click)="logout()">Logout</button>
+    </div>
+  </header>
+
+  <div class="pos-content">
+    <div class="products-section">
+      <div class="search-controls">
+        <div class="search-bar">
+          <input
+            type="text"
+            class="search-input"
+            [(ngModel)]="searchTerm"
+            (keyup.enter)="searchProducts()"
+            placeholder="Search products by name, code, or barcode..."
+          >
+          <button class="search-btn" (click)="searchProducts()">
+            <span>🔍</span>
+          </button>
+        </div>
+        
+        <div class="barcode-scanner">
+          <input
+            type="text"
+            class="barcode-input"
+            [(ngModel)]="barcodeInput"
+            (keyup.enter)="scanBarcode()"
+            placeholder="Scan barcode..."
+          >
+          <button class="scan-btn" (click)="scanBarcode()">
+            <span>📷 Scan</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="category-filters">
+        <button
+          class="category-btn"
+          [class.active]="selectedCategory() === null"
+          (click)="selectCategory(null)"
+        >
+          All Categories
+        </button>
+        @for (category of categories(); track category.CategoryID) {
+          <button
+            class="category-btn"
+            [class.active]="selectedCategory()?.CategoryID === category.CategoryID"
+            (click)="selectCategory(category)"
+          >
+            {{ category.CategoryName }}
+          </button>
+        }
+      </div>
+
+      @if (selectedCategory() && filteredSubcategories().length > 0) {
+        <div class="subcategory-filters">
+          <button
+            class="subcategory-btn"
+            [class.active]="selectedSubcategory() === null"
+            (click)="selectSubcategory(null)"
+          >
+            All {{ selectedCategory()!.CategoryName }}
+          </button>
+          @for (subcategory of filteredSubcategories(); track subcategory.Refno) {
+            <button
+              class="subcategory-btn"
+              [class.active]="selectedSubcategory()?.Refno === subcategory.Refno"
+              (click)="selectSubcategory(subcategory)"
+            >
+              {{ subcategory.Subcategory }}
+            </button>
+          }
+        </div>
+      }
+
+      <div class="products-grid">
+        @for (product of filteredProducts(); track product.Refno) {
+          <div class="product-card" (click)="addToCart(product)">
+            <div class="product-image-placeholder">
+              {{ product.ProductName!.charAt(0) }}
+            </div>
+            <div class="product-info">
+              <h3 class="product-name">{{ product.ProductName }}</h3>
+              <p class="product-price">\${{ product.UnitPrice!.toFixed(2) }}</p>
+              @if (product.UnitsInStock! <= (product.ReorderLevel || 5)) {
+                <span class="low-stock">Low Stock</span>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="cart-section">
+      <h2 class="cart-title">Current Order</h2>
+
+      <div class="cart-items">
+        @if (cartItems().length === 0) {
+          <div class="empty-cart">
+            <p>No items in cart</p>
+            <p class="empty-cart-hint">Tap a product to add</p>
+          </div>
+        } @else {
+          @for (item of cartItems(); track item.product.Refno) {
+            <div class="cart-item">
+              <div class="cart-item-info">
+                <h4>{{ item.product.ProductName }}</h4>
+                <p class="cart-item-price">\${{ item.product.UnitPrice!.toFixed(2) }} each</p>
+              </div>
+              <div class="cart-item-actions">
+                <button class="qty-btn" (click)="decreaseQuantity(item.product.Refno!)">-</button>
+                <span class="qty-display">{{ item.quantity }}</span>
+                <button class="qty-btn" (click)="increaseQuantity(item.product.Refno!)">+</button>
+                <span class="item-total">\${{ item.subtotal.toFixed(2) }}</span>
+                <button class="remove-btn" (click)="removeFromCart(item.product.Refno!)">×</button>
+              </div>
+            </div>
+          }
+        }
+      </div>
+
+      <div class="cart-summary">
+        <div class="summary-row">
+          <span>Subtotal:</span>
+          <span>\${{ cart().subtotal.toFixed(2) }}</span>
+        </div>
+        <div class="summary-row">
+          <span>Tax (10%):</span>
+          <span>\${{ cart().taxAmount.toFixed(2) }}</span>
+        </div>
+        <div class="summary-row total">
+          <span>Total:</span>
+          <span>\${{ cart().total.toFixed(2) }}</span>
+        </div>
+      </div>
+
+      <div class="cart-actions">
+        <button
+          class="btn btn-secondary btn-block"
+          (click)="clearCart()"
+          [disabled]="cartItems().length === 0"
+        >
+          Clear Cart
+        </button>
+        <button
+          class="btn btn-primary btn-block"
+          (click)="openCheckout()"
+          [disabled]="cartItems().length === 0"
+        >
+          Checkout
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+@if (showCheckout()) {
+  <div class="checkout-modal">
+    <div class="checkout-content">
+      <div class="checkout-header">
+        <h2>Complete Sale</h2>
+        <button class="close-btn" (click)="closeCheckout()">×</button>
+      </div>
+
+      <div class="checkout-body">
+        <div class="form-group">
+          <label>Customer Name (Optional)</label>
+          <input type="text" [(ngModel)]="customerName" placeholder="Enter customer name">
+        </div>
+
+        <div class="form-group">
+          <label>Customer Phone (Optional)</label>
+          <input type="tel" [(ngModel)]="customerPhone" placeholder="Enter phone number">
+        </div>
+
+        <div class="form-group">
+          <label>Payment Method</label>
+          <select [(ngModel)]="paymentMethod">
+            @for (method of paymentMethods; track method) {
+              <option [value]="method">{{ method }}</option>
+            }
+          </select>
+        </div>
+
+        @if (paymentMethod === 'Cash') {
+          <div class="form-group">
+            <label>Cash Received</label>
+            <input type="number" [(ngModel)]="cashReceived" placeholder="0.00" step="0.01">
+            @if (cashReceived > 0) {
+              <p class="change-display">Change: \${{ getChange().toFixed(2) }}</p>
+            }
+          </div>
+        }
+
+        <div class="checkout-summary">
+          <div class="summary-row">
+            <span>Subtotal:</span>
+            <span>\${{ cart().subtotal.toFixed(2) }}</span>
+          </div>
+          <div class="summary-row">
+            <span>Tax:</span>
+            <span>\${{ cart().taxAmount.toFixed(2) }}</span>
+          </div>
+          <div class="summary-row total">
+            <span>Total:</span>
+            <span>\${{ cart().total.toFixed(2) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="checkout-footer">
+        <button class="btn btn-secondary" (click)="closeCheckout()">Cancel</button>
+        <button class="btn btn-primary" (click)="completeSale()">Complete Sale</button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (showPrintPrompt()) {
+  <div class="checkout-modal print-modal">
+    <div class="checkout-content print-prompt">
+      <div class="checkout-header">
+        <h2>🖨️ Print Receipt</h2>
+      </div>
+
+      <div class="checkout-body">
+        <p style="text-align: center; font-size: 16px; margin: 20px 0;">
+          Sale completed successfully!<br>
+          Would you like to print the receipt?
+        </p>
+        
+        @if (lastSaleReceipt) {
+          <div class="receipt-preview">
+            <div><strong>Receipt #:</strong> {{ lastSaleReceipt.transactionNumber }}</div>
+            <div><strong>Total:</strong> \${{ lastSaleReceipt.total.toFixed(2) }}</div>
+            <div><strong>Payment:</strong> {{ lastSaleReceipt.paymentMethod }}</div>
+          </div>
+        }
+      </div>
+
+      <div class="checkout-footer">
+        <button class="btn btn-secondary" (click)="skipPrint()">Skip</button>
+        <button class="btn btn-primary" (click)="printReceipt()">
+          🖨️ Print Receipt
+        </button>
+      </div>
+    </div>
+  </div>
+}

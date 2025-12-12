@@ -1,0 +1,155 @@
+<div class="admin-dashboard-layout">
+  <app-universal-sidebar
+    [title]="'Admin Panel'"
+    [items]="sidebarItems"
+    [activeItem]="activeView"
+    (itemClick)="onSidebarItemClick($event)"
+    (logoutClick)="onLogout()">
+  </app-universal-sidebar>
+
+  <div class="main-content">
+    <div class="content-header">
+      <div class="header-info">
+        <h1>Admin Dashboard</h1>
+        <p class="subtitle">{{ organisationName }} - {{ currentUser?.fullName }}</p>
+      </div>
+    </div>
+
+    @if (activeView === 'overview') {
+      <div class="overview-section">
+        <app-stats-cards [cards]="statCards"></app-stats-cards>
+
+        <div class="reports-section">
+          <div class="section-header">
+            <h2>6 Core Admin Reports</h2>
+            <div class="report-actions">
+              <button mat-raised-button color="primary" (click)="printReport('userActivity')">
+                <mat-icon>print</mat-icon> User Activity
+              </button>
+              <button mat-raised-button color="primary" (click)="printReport('systemPerformance')">
+                <mat-icon>print</mat-icon> Performance
+              </button>
+              <button mat-raised-button color="primary" (click)="printReport('securityAudit')">
+                <mat-icon>print</mat-icon> Security Audit
+              </button>
+              <button mat-raised-button color="primary" (click)="printReport('rolePermissions')">
+                <mat-icon>print</mat-icon> Roles
+              </button>
+              <button mat-raised-button color="primary" (click)="printReport('moduleUsage')">
+                <mat-icon>print</mat-icon> Module Usage
+              </button>
+              <button mat-raised-button color="primary" (click)="printReport('systemHealth')">
+                <mat-icon>print</mat-icon> System Health
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    @if (activeView === 'reports') {
+      <div class="reports-view">
+        <app-date-filter (filterChange)="onFilterChange($event)"></app-date-filter>
+
+        @if (filteredData.length > 0) {
+          <app-data-table
+            [columns]="tableColumns"
+            [data]="filteredData"
+            [enableActions]="true"
+            [enableSelection]="true"
+            [pageSize]="25">
+            <div actions>
+              <button mat-raised-button color="primary" (click)="exportToCSV('reports')">
+                <mat-icon>download</mat-icon> Export CSV
+              </button>
+              <button mat-raised-button color="accent" (click)="printReport('userActivity')">
+                <mat-icon>print</mat-icon> Print Report
+              </button>
+            </div>
+          </app-data-table>
+        } @else {
+          <app-empty-state
+            [icon]="'assignment'"
+            [title]="'No Reports Found'"
+            [message]="'No reports match your current filter criteria. Try adjusting the date range.'"
+            [actionLabel]="'Reset Filters'"
+            [actionIcon]="'refresh'"
+            [action]="applyDateFilter.bind(this)">
+          </app-empty-state>
+        }
+      </div>
+    }
+
+    @if (activeView === 'users') {
+      <div class="users-section">
+        <h2>User Management</h2>
+        <app-empty-state
+          [icon]="'people'"
+          [title]="'User Management'"
+          [message]="'User management interface coming soon. Manage all system users, roles, and permissions.'"
+          [actionLabel]="'Add New User'"
+          [actionIcon]="'person_add'">
+        </app-empty-state>
+      </div>
+    }
+
+    @if (activeView === 'roles') {
+      <div class="roles-section">
+        <h2>Roles & Permissions</h2>
+        <app-empty-state
+          [icon]="'security'"
+          [title]="'Roles & Permissions'"
+          [message]="'Configure system roles and permissions. Define access levels for different user types.'"
+          [actionLabel]="'Create New Role'"
+          [actionIcon]="'add_circle'">
+        </app-empty-state>
+      </div>
+    }
+
+    @if (activeView === 'settings') {
+      <div class="settings-section">
+        <h2>System Settings</h2>
+        <app-empty-state
+          [icon]="'settings'"
+          [title]="'System Configuration'"
+          [message]="'Configure system-wide settings including security, notifications, and integrations.'"
+          [actionLabel]="'View Settings'"
+          [actionIcon]="'tune'">
+        </app-empty-state>
+      </div>
+    }
+
+    @if (activeView === 'audit') {
+      <div class="audit-section">
+        <h2>Audit Logs</h2>
+        <app-empty-state
+          [icon]="'history'"
+          [title]="'Audit Trail'"
+          [message]="'View comprehensive audit logs of all system activities and user actions.'"
+          [actionLabel]="'View Logs'"
+          [actionIcon]="'visibility'">
+        </app-empty-state>
+      </div>
+    }
+  </div>
+
+  <!-- Floating Action Button -->
+  <button mat-fab class="fab-add" color="primary" [matMenuTriggerFor]="adminMenu" matTooltip="Quick Actions">
+    <mat-icon>add</mat-icon>
+  </button>
+
+  <mat-menu #adminMenu="matMenu">
+    <button mat-menu-item (click)="addUser()">
+      <mat-icon>person_add</mat-icon>
+      <span>Add User</span>
+    </button>
+    <button mat-menu-item (click)="generateReport()">
+      <mat-icon>assessment</mat-icon>
+      <span>Generate Report</span>
+    </button>
+    <button mat-menu-item (click)="viewSettings()">
+      <mat-icon>settings</mat-icon>
+      <span>System Settings</span>
+    </button>
+  </mat-menu>
+</div>

@@ -1,0 +1,371 @@
+<div class="inventory-dashboard-layout">
+  <app-universal-sidebar
+    [title]="'Inventory Management'"
+    [items]="sidebarItems"
+    [activeItem]="activeView"
+    (itemClick)="onSidebarItemClick($event)"
+    (logoutClick)="onLogout()">
+  </app-universal-sidebar>
+
+  <div class="main-content">
+    <div class="content-header">
+      <div class="header-info">
+        <h1><mat-icon>inventory</mat-icon> Inventory Dashboard</h1>
+        <p class="subtitle">{{ organisationName }} - {{ currentUser?.fullName }}</p>
+      </div>
+    </div>
+
+    @if (activeView === 'overview') {
+      <div class="overview-section">
+        <app-stats-cards [cards]="statCards"></app-stats-cards>
+
+        <!-- Quick Stats Grid -->
+        <div class="quick-stats">
+          <mat-card class="stat-card">
+            <mat-card-content>
+              <div class="stat-icon"><mat-icon>warehouse</mat-icon></div>
+              <div class="stat-info">
+                <h3>{{ warehouses.length }}</h3>
+                <p>Active Warehouses</p>
+              </div>
+            </mat-card-content>
+          </mat-card>
+          <mat-card class="stat-card">
+            <mat-card-content>
+              <div class="stat-icon"><mat-icon>swap_horiz</mat-icon></div>
+              <div class="stat-info">
+                <h3>{{ pendingTransfersCount }}</h3>
+                <p>Pending Transfers</p>
+              </div>
+            </mat-card-content>
+          </mat-card>
+          <mat-card class="stat-card">
+            <mat-card-content>
+              <div class="stat-icon"><mat-icon>tune</mat-icon></div>
+              <div class="stat-info">
+                <h3>{{ adjustmentsData.length }}</h3>
+                <p>Recent Adjustments</p>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="activity-section">
+          <h2><mat-icon>history</mat-icon> Recent Activity</h2>
+          <div class="activity-feed">
+            @for (activity of recentActivity; track activity.id) {
+              <div class="activity-item">
+                <div class="activity-icon">
+                  <mat-icon>{{ activity.action === 'Stock Transfer' ? 'swap_horiz' : activity.action === 'Stock Adjustment' ? 'tune' : activity.action === 'Product Added' ? 'add_circle' : 'warning' }}</mat-icon>
+                </div>
+                <div class="activity-details">
+                  <p class="activity-action"><strong>{{ activity.action }}</strong></p>
+                  <p class="activity-description">{{ activity.details }}</p>
+                  <p class="activity-meta">{{ activity.user }} • {{ activity.timestamp | date:'short' }}</p>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Reports Section -->
+        <div class="reports-section">
+          <div class="section-header">
+            <h2><mat-icon>assessment</mat-icon> 6 Core Inventory Reports</h2>
+            <div class="report-actions">
+              <button mat-raised-button color="primary" (click)="printReport('stockValuation')">
+                <mat-icon>print</mat-icon> Stock Valuation
+              </button>
+              <button mat-raised-button color="primary" (click)="printReport('stockMovement')">
+                <mat-icon>print</mat-icon> Stock Movement
+              </button>
+              <button mat-raised-button color="primary" (click)="printReport('lowStock')">
+                <mat-icon>print</mat-icon> Low Stock
+              </button>
+              <button mat-raised-button color="primary" (click)="printReport('deadStock')">
+                <mat-icon>print</mat-icon> Dead Stock Analysis
+              </button>
+              <button mat-raised-button color="primary" (click)="printReport('warehouseSummary')">
+                <mat-icon>print</mat-icon> Warehouse Summary
+              </button>
+              <button mat-raised-button color="primary" (click)="printReport('reorderSuggestions')">
+                <mat-icon>print</mat-icon> Reorder Suggestions
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    @if (activeView === 'products') {
+      <div class="products-view">
+        <div class="view-header">
+          <h2><mat-icon>inventory_2</mat-icon> Products Catalog</h2>
+          <button mat-raised-button color="primary">
+            <mat-icon>add</mat-icon> Add New Product
+          </button>
+        </div>
+        <app-data-table
+          [columns]="productsColumns"
+          [data]="productsData"
+          [enableActions]="true"
+          [enableSelection]="true"
+          [pageSize]="25">
+          <div actions>
+            <button mat-raised-button color="primary" (click)="exportToCSV('products')">
+              <mat-icon>download</mat-icon> Export CSV
+            </button>
+          </div>
+        </app-data-table>
+      </div>
+    }
+
+    @if (activeView === 'stock') {
+      <div class="stock-view">
+        <div class="view-header">
+          <h2><mat-icon>warehouse</mat-icon> Stock Levels by Warehouse</h2>
+          <div class="header-actions">
+            <button mat-raised-button color="accent">
+              <mat-icon>add</mat-icon> Stock Adjustment
+            </button>
+            <button mat-raised-button color="primary">
+              <mat-icon>swap_horiz</mat-icon> Transfer Stock
+            </button>
+          </div>
+        </div>
+        <app-data-table
+          [columns]="stockLevelsColumns"
+          [data]="stockLevelsData"
+          [enableActions]="true"
+          [enableSelection]="false"
+          [pageSize]="25">
+          <div actions>
+            <button mat-raised-button color="primary" (click)="exportToCSV('stock')">
+              <mat-icon>download</mat-icon> Export CSV
+            </button>
+          </div>
+        </app-data-table>
+      </div>
+    }
+
+    @if (activeView === 'transfers') {
+      <div class="transfers-view">
+        <div class="view-header">
+          <h2><mat-icon>swap_horiz</mat-icon> Stock Transfers</h2>
+          <button mat-raised-button color="primary">
+            <mat-icon>add</mat-icon> New Transfer
+          </button>
+        </div>
+        <app-date-filter (filterChange)="onFilterChange($event)"></app-date-filter>
+        <app-data-table
+          [columns]="transfersColumns"
+          [data]="filteredData"
+          [enableActions]="true"
+          [enableSelection]="true"
+          [pageSize]="25">
+          <div actions>
+            <button mat-raised-button color="primary" (click)="exportToCSV('transfers')">
+              <mat-icon>download</mat-icon> Export CSV
+            </button>
+          </div>
+        </app-data-table>
+      </div>
+    }
+
+    @if (activeView === 'adjustments') {
+      <div class="adjustments-view">
+        <div class="view-header">
+          <h2><mat-icon>tune</mat-icon> Stock Adjustments</h2>
+          <button mat-raised-button color="primary">
+            <mat-icon>add</mat-icon> New Adjustment
+          </button>
+        </div>
+        <app-date-filter (filterChange)="onFilterChange($event)"></app-date-filter>
+        <app-data-table
+          [columns]="adjustmentsColumns"
+          [data]="filteredData"
+          [enableActions]="true"
+          [enableSelection]="false"
+          [pageSize]="25">
+          <div actions>
+            <button mat-raised-button color="primary" (click)="exportToCSV('adjustments')">
+              <mat-icon>download</mat-icon> Export CSV
+            </button>
+          </div>
+        </app-data-table>
+      </div>
+    }
+
+    @if (activeView === 'warehouses') {
+      <div class="warehouses-view">
+        <div class="view-header">
+          <h2><mat-icon>business</mat-icon> Warehouses</h2>
+          <button mat-raised-button color="primary">
+            <mat-icon>add</mat-icon> Add Warehouse
+          </button>
+        </div>
+        <div class="warehouses-grid">
+          @for (warehouse of warehouses; track warehouse.id) {
+            <mat-card class="warehouse-card">
+              <mat-card-header>
+                <mat-icon mat-card-avatar>business</mat-icon>
+                <mat-card-title>{{ warehouse.name }}</mat-card-title>
+                <mat-card-subtitle>{{ warehouse.location }}</mat-card-subtitle>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="warehouse-info">
+                  <p><strong>Manager:</strong> {{ warehouse.manager }}</p>
+                  <p><strong>Capacity:</strong> {{ warehouse.capacity }} units</p>
+                  <p><strong>Current Stock:</strong> {{ warehouse.currentStock }} units</p>
+                  <div class="utilization-bar">
+                    <p><strong>Utilization:</strong> {{ warehouse.utilization }}%</p>
+                    <mat-progress-bar 
+                      mode="determinate" 
+                      [value]="warehouse.utilization"
+                      [color]="warehouse.utilization > 80 ? 'warn' : 'primary'">
+                    </mat-progress-bar>
+                  </div>
+                </div>
+              </mat-card-content>
+              <mat-card-actions>
+                <button mat-button color="primary">
+                  <mat-icon>visibility</mat-icon> View Details
+                </button>
+                <button mat-button color="accent">
+                  <mat-icon>edit</mat-icon> Edit
+                </button>
+              </mat-card-actions>
+            </mat-card>
+          }
+        </div>
+      </div>
+    }
+
+    @if (activeView === 'reports') {
+      <div class="reports-view">
+        <h2><mat-icon>assessment</mat-icon> Inventory Reports</h2>
+        <div class="reports-grid">
+          <mat-card class="report-card" (click)="printReport('stockValuation')">
+            <mat-icon>monetization_on</mat-icon>
+            <h3>Stock Valuation Report</h3>
+            <p>Complete valuation of all inventory items</p>
+          </mat-card>
+          <mat-card class="report-card" (click)="printReport('stockMovement')">
+            <mat-icon>swap_horiz</mat-icon>
+            <h3>Stock Movement Report</h3>
+            <p>Track all stock transfers and movements</p>
+          </mat-card>
+          <mat-card class="report-card" (click)="printReport('lowStock')">
+            <mat-icon>warning</mat-icon>
+            <h3>Low Stock Report</h3>
+            <p>Products that need to be reordered</p>
+          </mat-card>
+          <mat-card class="report-card" (click)="printReport('deadStock')">
+            <mat-icon>inventory</mat-icon>
+            <h3>Dead Stock Analysis</h3>
+            <p>Identify slow-moving or dead stock</p>
+          </mat-card>
+          <mat-card class="report-card" (click)="printReport('warehouseSummary')">
+            <mat-icon>business</mat-icon>
+            <h3>Warehouse Summary</h3>
+            <p>Overview of all warehouse operations</p>
+          </mat-card>
+          <mat-card class="report-card" (click)="printReport('reorderSuggestions')">
+            <mat-icon>shopping_cart</mat-icon>
+            <h3>Reorder Suggestions</h3>
+            <p>Recommended products to reorder</p>
+          </mat-card>
+        </div>
+      </div>
+    }
+
+    @if (activeView === 'alerts') {
+      <div class="alerts-view">
+        <div class="view-header">
+          <h2><mat-icon>warning</mat-icon> Low Stock Alerts</h2>
+          <button mat-raised-button color="warn">
+            <mat-icon>refresh</mat-icon> Refresh Alerts
+          </button>
+        </div>
+        
+        <div class="alerts-summary">
+          <mat-chip-set>
+            <mat-chip class="chip-critical">
+              <mat-icon>error</mat-icon> Critical: {{ criticalAlertsCount }}
+            </mat-chip>
+            <mat-chip class="chip-warning">
+              <mat-icon>warning</mat-icon> Warning: {{ warningAlertsCount }}
+            </mat-chip>
+            <mat-chip class="chip-info">
+              <mat-icon>info</mat-icon> Info: {{ infoAlertsCount }}
+            </mat-chip>
+          </mat-chip-set>
+        </div>
+
+        <div class="alerts-list">
+          @for (alert of alertsData; track alert.id) {
+            <mat-card class="alert-card" [class]="'severity-' + alert.severity.toLowerCase()">
+              <mat-card-content>
+                <div class="alert-header">
+                  <mat-icon [class]="'icon-' + alert.severity.toLowerCase()">
+                    {{ alert.severity === 'Critical' ? 'error' : alert.severity === 'Warning' ? 'warning' : 'info' }}
+                  </mat-icon>
+                  <div class="alert-info">
+                    <h3>{{ alert.productName }}</h3>
+                    <p class="alert-warehouse">{{ alert.warehouse }}</p>
+                  </div>
+                  <button mat-icon-button (click)="dismissAlert(alert.id)" class="dismiss-btn">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                </div>
+                <div class="alert-details">
+                  <div class="detail-item">
+                    <span class="label">Current Stock:</span>
+                    <span class="value">{{ alert.currentStock }} units</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="label">Reorder Level:</span>
+                    <span class="value">{{ alert.reorderLevel }} units</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="label">Severity:</span>
+                    <mat-chip [class]="'chip-' + alert.severity.toLowerCase()">{{ alert.severity }}</mat-chip>
+                  </div>
+                </div>
+                <mat-card-actions>
+                  <button mat-button color="primary">
+                    <mat-icon>shopping_cart</mat-icon> Create Purchase Order
+                  </button>
+                  <button mat-button color="accent">
+                    <mat-icon>visibility</mat-icon> View Product
+                  </button>
+                </mat-card-actions>
+              </mat-card-content>
+            </mat-card>
+          }
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Floating Action Button -->
+  <button mat-fab class="fab-add" color="primary" [matMenuTriggerFor]="invMenu" matTooltip="Quick Actions">
+    <mat-icon>add</mat-icon>
+  </button>
+
+  <mat-menu #invMenu="matMenu">
+    <button mat-menu-item (click)="addProduct()">
+      <mat-icon>inventory</mat-icon>
+      <span>Add Product</span>
+    </button>
+    <button mat-menu-item (click)="receiveStock()">
+      <mat-icon>arrow_downward</mat-icon>
+      <span>Receive Stock</span>
+    </button>
+    <button mat-menu-item (click)="transferStock()">
+      <mat-icon>swap_horiz</mat-icon>
+      <span>Transfer Stock</span>
+    </button>
+  </mat-menu>
+</div>

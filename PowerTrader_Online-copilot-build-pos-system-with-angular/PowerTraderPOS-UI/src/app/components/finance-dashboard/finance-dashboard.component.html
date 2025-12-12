@@ -1,0 +1,46 @@
+<mat-toolbar color="primary">
+  <span>Finance Dashboard - {{currentUser?.fullName}}</span>
+  <span class="spacer"></span>
+  <button mat-raised-button color="accent" (click)="logout()">Logout</button>
+</mat-toolbar>
+<div class="dashboard-container">
+  <h1>Finance Dashboard</h1>
+  <div class="dashboard-grid">
+    <mat-card>
+      <mat-card-header><mat-card-title>Revenue Reports</mat-card-title></mat-card-header>
+      <mat-card-content><p>View revenue and sales reports</p></mat-card-content>
+    </mat-card>
+    <mat-card>
+      <mat-card-header><mat-card-title>Expenses</mat-card-title></mat-card-header>
+      <mat-card-content><p>Track and manage expenses</p></mat-card-content>
+    </mat-card>
+    <mat-card>
+      <mat-card-header><mat-card-title>Payments</mat-card-title></mat-card-header>
+      <mat-card-content><p>Process and track payments</p></mat-card-content>
+    </mat-card>
+    <mat-card>
+      <mat-card-header><mat-card-title>Financial Reports</mat-card-title></mat-card-header>
+      <mat-card-content><p>Generate financial statements</p></mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Floating Action Button -->
+  <button mat-fab class="fab-add" color="primary" [matMenuTriggerFor]="finMenu" matTooltip="Quick Actions">
+    <mat-icon>add</mat-icon>
+  </button>
+
+  <mat-menu #finMenu="matMenu">
+    <button mat-menu-item (click)="createTransaction()">
+      <mat-icon>receipt</mat-icon>
+      <span>New Transaction</span>
+    </button>
+    <button mat-menu-item (click)="createInvoice()">
+      <mat-icon>description</mat-icon>
+      <span>Create Invoice</span>
+    </button>
+    <button mat-menu-item (click)="recordPayment()">
+      <mat-icon>payment</mat-icon>
+      <span>Record Payment</span>
+    </button>
+  </mat-menu>
+</div>

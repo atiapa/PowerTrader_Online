@@ -1,0 +1,157 @@
+@use '../../styles/dashboard-modern.scss' as *;
+@use 'sass:color';
+
+// ==========================================
+// FINANCE DASHBOARD - MODERN REDESIGN
+// ==========================================
+$finance-primary: #11998e;
+$finance-secondary: #38ef7d;
+
+.finance-dashboard-layout {
+  @include modern-dashboard-layout;
+  
+  &::before {
+    @include animated-background($finance-primary, $finance-secondary, color.adjust($finance-primary, $lightness: 15%));
+  }
+}
+
+.main-content {
+  @include main-content;
+}
+
+.content-header {
+  @include content-header($finance-primary, $finance-secondary);
+}
+
+.overview-section {
+  animation: slideIn 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+// Financial Stats Cards
+.stats-grid {
+  margin-bottom: 32px;
+  @include responsive-grid(4, 24px);
+
+  .stat-card {
+    @include modern-stat-card;
+
+    &:nth-child(1) .stat-icon {
+      background: linear-gradient(135deg, #11998e, #38ef7d);
+    }
+
+    &:nth-child(2) .stat-icon {
+      background: linear-gradient(135deg, #f093fb, #f5576c);
+    }
+
+    &:nth-child(3) .stat-icon {
+      background: linear-gradient(135deg, #4facfe, #00f2fe);
+    }
+
+    &:nth-child(4) .stat-icon {
+      background: linear-gradient(135deg, #43e97b, #38f9d7);
+    }
+  }
+}
+
+// Reports Section
+.reports-section {
+  @include glass-card;
+  padding: 40px;
+  margin-top: 32px;
+
+  h2 {
+    font-size: 28px;
+    font-weight: 700;
+    margin: 0 0 32px 0;
+    background: linear-gradient(135deg, $finance-primary, $finance-secondary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .report-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+
+    button {
+      @include gradient-button($finance-primary, $finance-secondary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      mat-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+      }
+    }
+  }
+}
+
+// Transactions Table
+.transactions-table {
+  @include modern-table;
+  margin-top: 32px;
+}
+
+// Charts Section
+.charts-section {
+  margin-top: 32px;
+  @include responsive-grid(2, 24px);
+
+  .chart-card {
+    @include glass-card;
+    padding: 32px;
+
+    h3 {
+      font-size: 20px;
+      font-weight: 600;
+      margin: 0 0 24px 0;
+      color: #1e293b;
+    }
+  }
+}
+
+// Floating Action Button
+.fab-add {
+  @include modern-fab($finance-primary);
+}
+
+// Legacy support for existing structure
+.spacer {
+  flex: 1 1 auto;
+}
+
+.dashboard-container {
+  @include glass-card;
+  padding: 40px;
+  margin-bottom: 24px;
+
+  mat-card {
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.9);
+
+    &:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 32px rgba($finance-primary, 0.2);
+    }
+  }
+}
+
+.dashboard-grid {
+  margin-top: 24px;
+  @include responsive-grid(3, 24px);
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .content-header {
+    padding: 28px 24px;
+
+    .header-info h1 {
+      font-size: 32px;
+    }
+  }
+}

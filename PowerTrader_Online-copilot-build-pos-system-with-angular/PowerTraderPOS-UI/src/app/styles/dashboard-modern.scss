@@ -1,0 +1,1168 @@
+@use 'sass:color';
+
+// ==========================================
+// MODERN DASHBOARD DESIGN SYSTEM
+// ==========================================
+// Shared styles for all dashboards with glassmorphism, 
+// gradients, animations, and modern UI patterns
+
+// ==========================================
+// GRADIENT THEMES (Per Dashboard)
+// ==========================================
+@mixin dashboard-gradient($color1, $color2) {
+  background: linear-gradient(135deg, $color1 0%, $color2 100%);
+}
+
+$dashboard-themes: (
+  'admin': (#667eea, #764ba2),
+  'finance': (#11998e, #38ef7d),
+  'inventory': (#f093fb, #f5576c),
+  'hr': (#4facfe, #00f2fe),
+  'fleet': (#fa709a, #fee140),
+  'service': (#30cfd0, #330867),
+  'customers': (#a8edea, #fed6e3),
+  'suppliers': (#ff6b6b, #feca57)
+);
+
+// ==========================================
+// MODERN GLASSMORPHISM CARD WITH ENHANCED EFFECTS
+// ==========================================
+@mixin glass-card {
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 
+    0 8px 32px rgba(31, 38, 135, 0.12),
+    0 4px 16px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.03);
+  border-radius: 28px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+
+  // Subtle inner glow effect
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, 
+      transparent, 
+      rgba(255, 255, 255, 0.8), 
+      transparent);
+  }
+
+  &:hover {
+    transform: translateY(-12px) scale(1.02);
+    box-shadow: 
+      0 24px 56px rgba(31, 38, 135, 0.18),
+      0 8px 24px rgba(0, 0, 0, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 1),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+    border-color: rgba(255, 255, 255, 0.6);
+  }
+}
+
+// ==========================================
+// ENHANCED GRADIENT BUTTON WITH MODERN EFFECTS
+// ==========================================
+@mixin gradient-button($color1, $color2) {
+  background: linear-gradient(135deg, $color1, $color2);
+  border: none;
+  color: white;
+  padding: 16px 36px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.3px;
+  box-shadow: 
+    0 8px 24px rgba($color1, 0.45),
+    0 4px 12px rgba($color2, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+
+  // Shimmer effect
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -100%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+      120deg,
+      transparent,
+      rgba(255, 255, 255, 0.4),
+      transparent
+    );
+    transition: left 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: rotate(30deg);
+  }
+
+  // Subtle glow ring
+  &::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 22px;
+    padding: 2px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.1));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+
+  &:hover {
+    transform: translateY(-4px) scale(1.03);
+    box-shadow: 
+      0 16px 40px rgba($color1, 0.6),
+      0 8px 20px rgba($color2, 0.35),
+      inset 0 1px 0 rgba(255, 255, 255, 0.5);
+
+    &::before {
+      left: 100%;
+    }
+
+    &::after {
+      opacity: 1;
+    }
+  }
+
+  &:active {
+    transform: translateY(-2px) scale(0.99);
+    box-shadow: 
+      0 8px 20px rgba($color1, 0.5),
+      0 4px 10px rgba($color2, 0.3);
+  }
+}
+
+// ==========================================
+// ENHANCED ANIMATED GRADIENT BACKGROUND
+// ==========================================
+@mixin animated-background($color1, $color2, $color3) {
+  background: linear-gradient(-45deg, $color1, $color2, $color3, color.adjust($color1, $lightness: 10%));
+  background-size: 400% 400%;
+  animation: gradientShift 20s ease-in-out infinite;
+  position: relative;
+
+  // Add subtle pattern overlay
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: 
+      radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.08) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.06) 0%, transparent 50%),
+      radial-gradient(circle at 40% 20%, rgba(0, 0, 0, 0.03) 0%, transparent 50%);
+    pointer-events: none;
+  }
+}
+
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  25% { background-position: 100% 50%; }
+  50% { background-position: 100% 100%; }
+  75% { background-position: 0% 100%; }
+}
+
+// ==========================================
+// MODERN STAT CARD
+// ==========================================
+// ENHANCED MODERN STAT CARD WITH PREMIUM EFFECTS
+// ==========================================
+@mixin modern-stat-card {
+  @include glass-card;
+  padding: 32px;
+  position: relative;
+  overflow: hidden;
+
+  // Animated gradient blob background
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -30%;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    opacity: 0.12;
+    filter: blur(60px);
+    animation: float 8s ease-in-out infinite;
+  }
+
+  // Subtle shine effect
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.15),
+      transparent
+    );
+    animation: shine 6s ease-in-out infinite;
+  }
+
+  .stat-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+    box-shadow: 
+      0 12px 32px rgba(0, 0, 0, 0.18),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    position: relative;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    mat-icon {
+      font-size: 36px;
+      width: 36px;
+      height: 36px;
+      color: white;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+    }
+
+    &:hover {
+      transform: scale(1.08) rotate(5deg);
+      box-shadow: 
+        0 16px 40px rgba(0, 0, 0, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    }
+  }
+
+  .stat-value {
+    font-size: 42px;
+    font-weight: 800;
+    margin: 16px 0;
+    background: linear-gradient(135deg, #0f172a, #334155, #475569);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -1px;
+    position: relative;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
+
+  .stat-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .stat-change {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    margin-top: 16px;
+    padding: 8px 14px;
+    border-radius: 12px;
+    width: fit-content;
+
+    &.positive {
+      color: #059669;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    &.negative {
+      color: #dc2626;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+}
+
+// ==========================================
+// DASHBOARD LAYOUT
+// ==========================================
+@mixin modern-dashboard-layout {
+  display: flex;
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+
+  // Animated gradient background
+  &::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: -1;
+    opacity: 0.05;
+  }
+}
+
+@mixin main-content {
+  margin-left: 250px;
+  flex: 1;
+  padding: 32px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-y: auto;
+  position: relative;
+
+  @media (max-width: 1024px) {
+    margin-left: 70px;
+    padding: 24px;
+  }
+
+  @media (max-width: 768px) {
+    margin-left: 0;
+    padding: 20px 16px;
+  }
+}
+
+// ==========================================
+// ENHANCED MODERN HEADER WITH PREMIUM STYLING
+// ==========================================
+@mixin content-header($gradient-start, $gradient-end) {
+  background: linear-gradient(135deg, $gradient-start 0%, $gradient-end 100%);
+  border-radius: 32px;
+  padding: 48px 56px;
+  margin-bottom: 36px;
+  color: white;
+  box-shadow: 
+    0 20px 60px rgba($gradient-start, 0.45),
+    0 8px 24px rgba($gradient-end, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+
+  // Large decorative gradient orb
+  &::before {
+    content: '';
+    position: absolute;
+    top: -60%;
+    right: -15%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(
+      circle,
+      rgba(255, 255, 255, 0.25) 0%,
+      rgba(255, 255, 255, 0.1) 40%,
+      transparent 70%
+    );
+    border-radius: 50%;
+    animation: float 10s ease-in-out infinite;
+  }
+
+  // Animated particles effect
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: 
+      radial-gradient(circle at 15% 25%, rgba(255, 255, 255, 0.08) 0%, transparent 40%),
+      radial-gradient(circle at 85% 75%, rgba(255, 255, 255, 0.06) 0%, transparent 50%),
+      radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.03) 0%, transparent 60%);
+    animation: pulse 8s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  .header-info {
+    position: relative;
+    z-index: 2;
+
+    h1 {
+      font-size: 48px;
+      font-weight: 900;
+      margin: 0 0 16px 0;
+      text-shadow: 
+        0 4px 16px rgba(0, 0, 0, 0.25),
+        0 2px 4px rgba(0, 0, 0, 0.15);
+      letter-spacing: -1px;
+      line-height: 1.2;
+      animation: slideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .subtitle {
+      font-size: 19px;
+      opacity: 0.98;
+      margin: 0;
+      font-weight: 600;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      letter-spacing: 0.3px;
+      animation: slideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.1s both;
+    }
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 16px;
+    margin-top: 28px;
+    position: relative;
+    z-index: 2;
+    animation: slideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both;
+
+    button {
+      background: rgba(255, 255, 255, 0.22);
+      backdrop-filter: blur(16px) saturate(180%);
+      -webkit-backdrop-filter: blur(16px) saturate(180%);
+      border: 1.5px solid rgba(255, 255, 255, 0.5);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.35);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+      }
+    }
+  }
+}
+
+// ==========================================
+// NAVIGATION BUTTONS (Sidebar Items)
+// ==========================================
+@mixin modern-nav-button {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  border-radius: 16px;
+  color: #64748b;
+  font-weight: 500;
+  font-size: 15px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 4px;
+    border-radius: 0 4px 4px 0;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  mat-icon {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    transition: transform 0.3s ease;
+  }
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.04);
+    color: #1e293b;
+    transform: translateX(4px);
+
+    mat-icon {
+      transform: scale(1.1);
+    }
+  }
+
+  &.active {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+    color: #667eea;
+    font-weight: 600;
+
+    &::before {
+      opacity: 1;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+    }
+
+    mat-icon {
+      transform: scale(1.1);
+    }
+  }
+}
+
+// ==========================================
+// MODERN DATA TABLE
+// ==========================================
+@mixin modern-table {
+  @include glass-card;
+  padding: 32px;
+
+  .table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+
+    h3 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #1e293b;
+      margin: 0;
+    }
+
+    .table-actions {
+      display: flex;
+      gap: 12px;
+    }
+  }
+
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 12px;
+
+    thead {
+      tr {
+        th {
+          text-align: left;
+          padding: 16px 20px;
+          font-weight: 600;
+          font-size: 14px;
+          color: #64748b;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          border-bottom: 2px solid #e2e8f0;
+        }
+      }
+    }
+
+    tbody {
+      tr {
+        background: rgba(255, 255, 255, 0.6);
+        transition: all 0.3s ease;
+        border-radius: 12px;
+
+        &:hover {
+          background: rgba(102, 126, 234, 0.05);
+          transform: translateX(4px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        }
+
+        td {
+          padding: 20px;
+          font-size: 15px;
+          color: #334155;
+          border-top: 1px solid rgba(226, 232, 240, 0.6);
+          border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+
+          &:first-child {
+            border-left: 1px solid rgba(226, 232, 240, 0.6);
+            border-radius: 12px 0 0 12px;
+          }
+
+          &:last-child {
+            border-right: 1px solid rgba(226, 232, 240, 0.6);
+            border-radius: 0 12px 12px 0;
+          }
+        }
+      }
+    }
+  }
+}
+
+// ==========================================
+// FLOATING ACTION BUTTON
+// ==========================================
+@mixin modern-fab($color) {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, $color, color.adjust($color, $lightness: -15%));
+  color: white;
+  border: none;
+  box-shadow: 0 12px 32px rgba($color, 0.5);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+
+  mat-icon {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+  }
+
+  &:hover {
+    transform: scale(1.1) rotate(90deg);
+    box-shadow: 0 16px 48px rgba($color, 0.7);
+  }
+
+  &:active {
+    transform: scale(1.05) rotate(90deg);
+  }
+}
+
+// ==========================================
+// LOADING SKELETON
+// ==========================================
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+@mixin skeleton-loading {
+  background: linear-gradient(
+    90deg,
+    rgba(226, 232, 240, 0.4) 0%,
+    rgba(226, 232, 240, 0.8) 50%,
+    rgba(226, 232, 240, 0.4) 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+  border-radius: 12px;
+}
+
+// ==========================================
+// PULSE ANIMATION
+// ==========================================
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+// ==========================================
+// SLIDE IN ANIMATION
+// ==========================================
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-in {
+  animation: slideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+// ==========================================
+// STAGGER ANIMATION (for lists)
+// ==========================================
+@for $i from 1 through 10 {
+  .stagger-item:nth-child(#{$i}) {
+    animation-delay: #{$i * 0.1}s;
+  }
+}
+
+// ==========================================
+// RESPONSIVE GRID
+// ==========================================
+@mixin responsive-grid($columns: 4, $gap: 24px) {
+  display: grid;
+  grid-template-columns: repeat($columns, 1fr);
+  gap: $gap;
+
+  @media (max-width: 1400px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// ==========================================
+// BADGE/CHIP STYLES
+// ==========================================
+@mixin modern-badge($color: #667eea) {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  background: rgba($color, 0.15);
+  color: color.adjust($color, $lightness: -10%);
+  border: 1px solid rgba($color, 0.3);
+}
+
+// ==========================================
+// TOOLTIP
+// ==========================================
+@mixin modern-tooltip {
+  position: relative;
+
+  &::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-8px);
+    padding: 8px 12px;
+    background: #1e293b;
+    color: white;
+    border-radius: 8px;
+    font-size: 13px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  &:hover::after {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-12px);
+  }
+}
+
+// ==========================================
+// ENHANCED ANIMATION KEYFRAMES
+// ==========================================
+
+// Floating animation for decorative elements
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) translateX(0) scale(1);
+  }
+  25% {
+    transform: translateY(-20px) translateX(10px) scale(1.05);
+  }
+  50% {
+    transform: translateY(-10px) translateX(-15px) scale(1);
+  }
+  75% {
+    transform: translateY(-25px) translateX(5px) scale(0.95);
+  }
+}
+
+// Shine/shimmer effect for premium cards
+@keyframes shine {
+  0% {
+    left: -100%;
+  }
+  50%, 100% {
+    left: 150%;
+  }
+}
+
+// Glow pulse animation
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(255, 255, 255, 0.8);
+  }
+}
+
+// Scale bounce for interactive elements
+@keyframes bounce {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+// Rotate animation for loading states
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Fade slide in from bottom
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Fade slide in from right
+@keyframes fadeSlideRight {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+// Ripple effect
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+// Text gradient animation
+@keyframes textGradient {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+// Border glow animation
+@keyframes borderGlow {
+  0%, 100% {
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+  }
+  50% {
+    border-color: rgba(255, 255, 255, 0.6);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+  }
+}
+
+// ==========================================
+// MODERN UI UTILITY CLASSES
+// ==========================================
+
+// Premium gradient text
+@mixin gradient-text($color1, $color2) {
+  background: linear-gradient(135deg, $color1, $color2);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: textGradient 4s ease-in-out infinite;
+}
+
+// Neon glow effect
+@mixin neon-glow($color) {
+  box-shadow: 
+    0 0 10px rgba($color, 0.4),
+    0 0 20px rgba($color, 0.3),
+    0 0 30px rgba($color, 0.2),
+    inset 0 0 10px rgba($color, 0.1);
+  animation: glow 3s ease-in-out infinite;
+}
+
+// 3D card effect
+@mixin card-3d {
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    transform: rotateY(10deg) rotateX(5deg) translateZ(20px);
+  }
+}
+
+// Premium border with gradient
+@mixin gradient-border($color1, $color2, $width: 2px) {
+  position: relative;
+  background: white;
+  border-radius: 24px;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 24px;
+    padding: $width;
+    background: linear-gradient(135deg, $color1, $color2);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+}
+
+// Stagger animation for lists
+@mixin stagger-animation($items: 10, $delay: 0.1s) {
+  @for $i from 1 through $items {
+    &:nth-child(#{$i}) {
+      animation: fadeSlideUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) #{$i * $delay} both;
+    }
+  }
+}
+
+// Morphing background
+@mixin morphing-background($color1, $color2, $color3) {
+  background: linear-gradient(
+    -45deg,
+    $color1,
+    $color2,
+    $color3,
+    color.adjust($color1, $lightness: 10%)
+  );
+  background-size: 400% 400%;
+  animation: gradientShift 20s ease-in-out infinite;
+}
+
+// Glass button variant
+@mixin glass-button {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 14px 28px;
+  border-radius: 16px;
+  font-weight: 600;
+  box-shadow: 
+    0 8px 24px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-3px);
+    box-shadow: 
+      0 12px 32px rgba(0, 0, 0, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  }
+
+  &:active {
+    transform: translateY(-1px);
+  }
+}
+
+// Skeleton loading animation
+@mixin skeleton-loader($color: #e5e7eb) {
+  background: linear-gradient(
+    90deg,
+    $color 25%,
+    color.adjust($color, $lightness: 5%) 50%,
+    $color 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+// ==========================================
+// RESPONSIVE THEME UTILITIES
+// ==========================================
+
+// Responsive card padding
+@mixin responsive-card-padding {
+  padding: 32px;
+
+  @media (max-width: 768px) {
+    padding: 20px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 16px;
+  }
+}
+
+// Responsive grid system
+@mixin responsive-grid($columns: 3, $gap: 24px) {
+  display: grid;
+  grid-template-columns: repeat($columns, 1fr);
+  gap: $gap;
+
+  @media (max-width: 1200px) {
+    grid-template-columns: repeat(calc($columns - 1), 1fr);
+  }
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+// ==========================================
+// DARK MODE THEME SYSTEM
+// ==========================================
+
+// Dark mode glass card
+@mixin dark-glass-card {
+  background: rgba(30, 30, 40, 0.65);
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 
+    0 12px 40px rgba(0, 0, 0, 0.4),
+    0 4px 12px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+
+  &:hover {
+    border-color: rgba(255, 255, 255, 0.25);
+    box-shadow: 
+      0 16px 48px rgba(0, 0, 0, 0.5),
+      0 6px 16px rgba(0, 0, 0, 0.4),
+      inset 0 2px 0 rgba(255, 255, 255, 0.15);
+  }
+}
+
+// Dark mode gradient button
+@mixin dark-gradient-button($color1, $color2) {
+  background: linear-gradient(135deg, 
+    color.adjust($color1, $lightness: -15%), 
+    color.adjust($color2, $lightness: -10%));
+  color: white;
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 
+    0 8px 24px rgba(0, 0, 0, 0.4),
+    0 2px 8px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+
+  &:hover {
+    background: linear-gradient(135deg, 
+      color.adjust($color1, $lightness: -10%), 
+      color.adjust($color2, $lightness: -5%));
+    box-shadow: 
+      0 12px 32px rgba(0, 0, 0, 0.5),
+      0 4px 12px rgba(0, 0, 0, 0.3),
+      inset 0 2px 0 rgba(255, 255, 255, 0.3);
+  }
+}
+
+// Theme switcher
+// Usage: @include theme-aware(background, white, #1a1a1a);
+@mixin theme-aware($property, $light-value, $dark-value) {
+  #{$property}: $light-value;
+
+  @media (prefers-color-scheme: dark) {
+    #{$property}: $dark-value;
+  }
+}
+
+// ==========================================
+// PREMIUM COLOR THEMES
+// ==========================================
+
+// Cyberpunk theme
+@mixin cyberpunk-theme {
+  $neon-pink: #ff006e;
+  $neon-cyan: #00f5ff;
+  $neon-purple: #b967ff;
+
+  background: linear-gradient(135deg, 
+    rgba($neon-pink, 0.2), 
+    rgba($neon-cyan, 0.2), 
+    rgba($neon-purple, 0.2));
+  
+  .stat-card {
+    border: 2px solid rgba($neon-cyan, 0.4);
+    box-shadow: 
+      0 0 20px rgba($neon-cyan, 0.3),
+      inset 0 0 20px rgba($neon-cyan, 0.1);
+  }
+
+  .button-primary {
+    background: linear-gradient(135deg, $neon-pink, $neon-purple);
+    box-shadow: 
+      0 0 30px rgba($neon-pink, 0.5),
+      0 8px 24px rgba(0, 0, 0, 0.3);
+  }
+}
+
+// Aurora theme
+@mixin aurora-theme {
+  $aurora-green: #00ff87;
+  $aurora-blue: #60efff;
+  $aurora-purple: #a78bfa;
+
+  background: linear-gradient(135deg,
+    rgba($aurora-green, 0.15),
+    rgba($aurora-blue, 0.15),
+    rgba($aurora-purple, 0.15));
+  animation: gradientShift 25s ease-in-out infinite;
+
+  .glass-card {
+    background: rgba(255, 255, 255, 0.12);
+    border: 1.5px solid rgba($aurora-blue, 0.3);
+  }
+}
+
+// Sunset theme
+@mixin sunset-theme {
+  $sunset-orange: #ff6b35;
+  $sunset-pink: #ff3366;
+  $sunset-purple: #9b59b6;
+
+  background: linear-gradient(135deg,
+    $sunset-orange,
+    $sunset-pink,
+    $sunset-purple);
+  
+  .content-header {
+    background: linear-gradient(135deg,
+      rgba(white, 0.95),
+      rgba(white, 0.85));
+  }
+}
+
+// Ocean theme
+@mixin ocean-theme {
+  $ocean-blue: #0077be;
+  $ocean-teal: #00c9a7;
+  $ocean-cyan: #4dd0e1;
+
+  background: linear-gradient(135deg,
+    color.adjust($ocean-blue, $lightness: 15%),
+    $ocean-teal,
+    $ocean-cyan);
+
+  .stat-card {
+    background: rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(25px);
+  }
+}
+

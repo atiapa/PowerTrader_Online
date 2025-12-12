@@ -1,0 +1,348 @@
+@use '../../styles/dashboard-modern.scss' as *;
+@use 'sass:color';
+
+// ==========================================
+// SUPPLIERS DASHBOARD - MODERN REDESIGN
+// ==========================================
+$suppliers-primary: #ff6b6b;
+$suppliers-secondary: #feca57;
+
+.suppliers-dashboard-layout {
+  @include modern-dashboard-layout;
+  
+  &::before {
+    @include animated-background($suppliers-primary, $suppliers-secondary, color.adjust($suppliers-primary, $lightness: 15%));
+  }
+}
+
+.main-content {
+  @include main-content;
+}
+
+.content-header {
+  @include content-header($suppliers-primary, $suppliers-secondary);
+}
+
+// Supplier Stats Cards
+.stats-grid {
+  margin-bottom: 32px;
+  animation: slideIn 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  @include responsive-grid(4, 24px);
+
+  .stat-card {
+    @include modern-stat-card;
+
+    &:nth-child(1) .stat-icon {
+      background: linear-gradient(135deg, #ff6b6b, #feca57);
+    }
+
+    &:nth-child(2) .stat-icon {
+      background: linear-gradient(135deg, #11998e, #38ef7d);
+    }
+
+    &:nth-child(3) .stat-icon {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+    }
+
+    &:nth-child(4) .stat-icon {
+      background: linear-gradient(135deg, #fa709a, #fee140);
+    }
+  }
+}
+
+// Supplier Cards Grid
+.suppliers-grid {
+  margin-top: 32px;
+  @include responsive-grid(3, 24px);
+
+  .supplier-card {
+    @include glass-card;
+    padding: 28px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 16px 48px rgba($suppliers-primary, 0.15);
+    }
+
+    .supplier-logo {
+      width: 80px;
+      height: 80px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba($suppliers-primary, 0.1), rgba($suppliers-secondary, 0.1));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      overflow: hidden;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        padding: 12px;
+      }
+
+      mat-icon {
+        font-size: 48px;
+        width: 48px;
+        height: 48px;
+        color: rgba($suppliers-primary, 0.4);
+      }
+    }
+
+    h3 {
+      font-size: 20px;
+      font-weight: 600;
+      margin: 0 0 8px 0;
+      color: #1e293b;
+    }
+
+    .supplier-category {
+      font-size: 14px;
+      color: #64748b;
+      margin-bottom: 16px;
+    }
+
+    .supplier-info {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+
+      .info-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+
+        mat-icon {
+          color: $suppliers-primary;
+          width: 18px;
+          height: 18px;
+          font-size: 18px;
+        }
+
+        span {
+          font-size: 14px;
+          color: #334155;
+        }
+      }
+    }
+
+    .supplier-metrics {
+      display: flex;
+      gap: 20px;
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: 8px;
+      margin-bottom: 20px;
+
+      .metric {
+        flex: 1;
+        text-align: center;
+
+        .metric-value {
+          font-size: 20px;
+          font-weight: 700;
+          background: linear-gradient(135deg, $suppliers-primary, $suppliers-secondary);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+        }
+
+        .metric-label {
+          font-size: 11px;
+          color: #64748b;
+          margin-top: 4px;
+        }
+      }
+    }
+
+    .rating-section {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+
+      .rating {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        .stars {
+          color: $suppliers-secondary;
+          font-size: 18px;
+        }
+
+        .rating-value {
+          font-weight: 700;
+          color: #334155;
+        }
+      }
+
+      .status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+
+        &.verified {
+          background: rgba(34, 197, 94, 0.1);
+          color: #16a34a;
+        }
+
+        &.pending {
+          background: rgba(245, 158, 11, 0.1);
+          color: #d97706;
+        }
+      }
+    }
+
+    .supplier-actions {
+      display: flex;
+      gap: 12px;
+
+      button {
+        flex: 1;
+        height: 40px;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+        &:first-child {
+          @include gradient-button($suppliers-primary, $suppliers-secondary);
+        }
+
+        &:last-child {
+          background: rgba($suppliers-primary, 0.1);
+          color: $suppliers-primary;
+
+          &:hover {
+            background: rgba($suppliers-primary, 0.2);
+          }
+        }
+      }
+    }
+  }
+}
+
+// Purchase Orders Section
+.purchase-orders-section {
+  @include glass-card;
+  padding: 32px;
+  margin-top: 24px;
+
+  h2 {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 24px 0;
+    background: linear-gradient(135deg, $suppliers-primary, $suppliers-secondary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .orders-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    .order-item {
+      display: flex;
+      align-items: center;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: 12px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+      &:hover {
+        transform: translateX(8px);
+        background: rgba(255, 255, 255, 0.7);
+      }
+
+      .order-info {
+        flex: 1;
+
+        .order-number {
+          font-size: 16px;
+          font-weight: 600;
+          color: #1e293b;
+          margin-bottom: 8px;
+        }
+
+        .order-supplier {
+          font-size: 14px;
+          color: #64748b;
+        }
+      }
+
+      .order-amount {
+        font-size: 20px;
+        font-weight: 700;
+        background: linear-gradient(135deg, $suppliers-primary, $suppliers-secondary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin: 0 24px;
+      }
+
+      .order-status {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+
+        &.pending {
+          background: rgba(245, 158, 11, 0.1);
+          color: #d97706;
+        }
+
+        &.delivered {
+          background: rgba(34, 197, 94, 0.1);
+          color: #16a34a;
+        }
+
+        &.shipped {
+          background: rgba(59, 130, 246, 0.1);
+          color: #2563eb;
+        }
+      }
+    }
+  }
+}
+
+// Suppliers Table
+.suppliers-table {
+  @include modern-table;
+  margin-top: 32px;
+}
+
+// Floating Action Button
+.fab-add {
+  @include modern-fab($suppliers-primary);
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .content-header {
+    padding: 28px 24px;
+
+    .header-info h1 {
+      font-size: 32px;
+    }
+  }
+
+  .suppliers-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .order-item {
+    flex-direction: column;
+    align-items: flex-start !important;
+
+    .order-amount {
+      margin: 12px 0 !important;
+    }
+  }
+}

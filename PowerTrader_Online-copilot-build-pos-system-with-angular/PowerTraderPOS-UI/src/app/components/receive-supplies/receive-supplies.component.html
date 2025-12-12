@@ -1,0 +1,484 @@
+<div class="receive-supplies-container">
+  <!-- Stunning Header with Glassmorphism -->
+  <div class="header-section">
+    <div class="header-content">
+      <div class="icon-badge">
+        <mat-icon class="large-icon">inventory_2</mat-icon>
+      </div>
+      <div class="header-text">
+        <h1 class="main-title">Receive Supplies</h1>
+        <p class="subtitle">Process incoming inventory and update stock levels</p>
+      </div>
+    </div>
+    
+    <div class="header-meta-cards">
+      <div class="meta-card">
+        <mat-icon>receipt</mat-icon>
+        <div class="meta-info">
+          <span class="meta-label">Invoice Ref</span>
+          <span class="meta-value">{{ invoiceRef }}</span>
+        </div>
+      </div>
+      <div class="meta-card">
+        <mat-icon>event</mat-icon>
+        <div class="meta-info">
+          <span class="meta-label">Receive Date</span>
+          <span class="meta-value">{{ receiveDate | date: 'MMM d, y' }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="content-wrapper">
+    
+    <!-- Purchase Order Details Card -->
+    <div class="details-card elevated-card">
+      <div class="card-header">
+        <h2>
+          <mat-icon>description</mat-icon>
+          Purchase Order Details
+        </h2>
+      </div>
+      <div class="card-content">
+        <div class="form-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Supplier Name</mat-label>
+            <mat-select [(ngModel)]="supplierName">
+              <mat-option *ngFor="let supplier of suppliers" [value]="supplier">
+                {{ supplier }}
+              </mat-option>
+            </mat-select>
+            <mat-icon matPrefix>business</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Warehouse</mat-label>
+            <mat-select [(ngModel)]="warehouseName">
+              <mat-option *ngFor="let warehouse of warehouses" [value]="warehouse">
+                {{ warehouse }}
+              </mat-option>
+            </mat-select>
+            <mat-icon matPrefix>warehouse</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Receive Date</mat-label>
+            <input matInput [matDatepicker]="picker" [(ngModel)]="receiveDate">
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Invoice Reference</mat-label>
+            <input matInput [(ngModel)]="invoiceRef" readonly>
+            <mat-icon matPrefix>tag</mat-icon>
+          </mat-form-field>
+        </div>
+      </div>
+    </div>
+
+    <!-- Invoice Upload Card -->
+    <div class="upload-card elevated-card">
+      <div class="card-header">
+        <h2>
+          <mat-icon>cloud_upload</mat-icon>
+          Upload Invoice Document
+        </h2>
+      </div>
+      <div class="card-content">
+        @if (!uploadedInvoice) {
+          <div class="upload-zone" 
+               [class.dragging]="isDragging"
+               (click)="triggerFileInput()"
+               (dragover)="onDragOver($event)"
+               (dragleave)="onDragLeave($event)"
+               (drop)="onDrop($event)">
+            <mat-icon class="upload-icon">cloud_upload</mat-icon>
+            <h3>Drag & Drop Invoice Here</h3>
+            <p>or click to browse files</p>
+            <span class="file-info">Supports: PNG, JPG, PDF (Max 10MB)</span>
+            <input type="file" 
+                   id="invoice-file-input" 
+                   accept="image/png,image/jpeg,image/jpg,application/pdf"
+                   (change)="onFileSelected($event)"
+                   style="display: none;">
+          </div>
+        } @else {
+          <div class="uploaded-invoice">
+            <div class="invoice-preview">
+              @if (uploadedInvoice.file.type.startsWith('image/')) {
+                <img [src]="uploadedInvoice.preview" alt="Invoice Preview">
+              } @else {
+                <div class="pdf-preview">
+                  <mat-icon>picture_as_pdf</mat-icon>
+                  <span>PDF Document</span>
+                </div>
+              }
+            </div>
+            <div class="invoice-info">
+              <h4>{{ uploadedInvoice.file.name }}</h4>
+              <p class="file-size">{{ uploadedInvoice.size }}</p>
+              <p class="upload-date">Uploaded: {{ uploadedInvoice.uploadDate | date: 'short' }}</p>
+              <div class="invoice-actions">
+                <button mat-stroked-button (click)="viewInvoice()">
+                  <mat-icon>visibility</mat-icon>
+                  View
+                </button>
+                <button mat-stroked-button (click)="printInvoice()">
+                  <mat-icon>print</mat-icon>
+                  Print
+                </button>
+                <button mat-stroked-button color="warn" (click)="removeInvoice()">
+                  <mat-icon>delete</mat-icon>
+                  Remove
+                </button>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Add New Item Card -->
+    <div class="add-item-card elevated-card">
+      <div class="card-header">
+        <h2>
+          <mat-icon>add_box</mat-icon>
+          Add Supply Item
+        </h2>
+      </div>
+      <div class="card-content">
+        <div class="item-form-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Product Name</mat-label>
+            <input matInput [(ngModel)]="newItem.productName" placeholder="Enter product name">
+            <mat-icon matPrefix>inventory</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>SKU</mat-label>
+            <input matInput [(ngModel)]="newItem.sku" placeholder="Product SKU">
+            <mat-icon matPrefix>qr_code</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Category</mat-label>
+            <mat-select [(ngModel)]="newItem.category">
+              <mat-option *ngFor="let category of categories" [value]="category">
+                {{ category }}
+              </mat-option>
+            </mat-select>
+            <mat-icon matPrefix>category</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Quantity</mat-label>
+            <input matInput type="number" [(ngModel)]="newItem.quantity" 
+                   (ngModelChange)="calculateItemTotal()" min="0">
+            <mat-icon matPrefix>functions</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Unit Price</mat-label>
+            <input matInput type="number" [(ngModel)]="newItem.unitPrice" 
+                   (ngModelChange)="calculateItemTotal()" min="0" step="0.01">
+            <span matPrefix>$&nbsp;</span>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Total Price</mat-label>
+            <input matInput type="number" [(ngModel)]="newItem.totalPrice" readonly>
+            <span matPrefix>$&nbsp;</span>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Expiry Date (Optional)</mat-label>
+            <input matInput type="date" [(ngModel)]="newItem.expiryDate">
+            <mat-icon matPrefix>event_busy</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Batch Number (Optional)</mat-label>
+            <input matInput [(ngModel)]="newItem.batchNumber" placeholder="BATCH-2024-XXX">
+            <mat-icon matPrefix>label</mat-icon>
+          </mat-form-field>
+        </div>
+
+        <div class="add-item-footer">
+          <button mat-raised-button color="primary" class="add-item-btn" (click)="addItem()">
+            <mat-icon>add_circle</mat-icon>
+            Add Item to List
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Supply Items Table -->
+    <div class="items-table-card elevated-card">
+      <div class="card-header">
+        <h2>
+          <mat-icon>list_alt</mat-icon>
+          Supply Items ({{ supplyItems.length }})
+        </h2>
+        <div class="header-stats">
+          <span class="stat-chip">
+            <mat-icon>inventory</mat-icon>
+            {{ totalItems }} Total Units
+          </span>
+          <span class="stat-chip amount">
+            <mat-icon>payments</mat-icon>
+            ${{ totalAmount | number: '1.2-2' }}
+          </span>
+        </div>
+      </div>
+      <div class="card-content">
+        @if (supplyItems.length > 0) {
+          <div class="table-responsive">
+            <table mat-table [dataSource]="supplyItems" class="supply-items-table">
+              
+              <!-- Product Name Column -->
+              <ng-container matColumnDef="productName">
+                <th mat-header-cell *matHeaderCellDef>Product Name</th>
+                <td mat-cell *matCellDef="let item">
+                  <div class="product-cell">
+                    <mat-icon>inventory_2</mat-icon>
+                    <span>{{ item.productName }}</span>
+                  </div>
+                </td>
+              </ng-container>
+
+              <!-- SKU Column -->
+              <ng-container matColumnDef="sku">
+                <th mat-header-cell *matHeaderCellDef>SKU</th>
+                <td mat-cell *matCellDef="let item">
+                  <span class="sku-badge">{{ item.sku }}</span>
+                </td>
+              </ng-container>
+
+              <!-- Category Column -->
+              <ng-container matColumnDef="category">
+                <th mat-header-cell *matHeaderCellDef>Category</th>
+                <td mat-cell *matCellDef="let item">{{ item.category }}</td>
+              </ng-container>
+
+              <!-- Quantity Column -->
+              <ng-container matColumnDef="quantity">
+                <th mat-header-cell *matHeaderCellDef>Quantity</th>
+                <td mat-cell *matCellDef="let item">
+                  <span class="quantity-badge">{{ item.quantity }}</span>
+                </td>
+              </ng-container>
+
+              <!-- Unit Price Column -->
+              <ng-container matColumnDef="unitPrice">
+                <th mat-header-cell *matHeaderCellDef>Unit Price</th>
+                <td mat-cell *matCellDef="let item">${{ item.unitPrice | number: '1.2-2' }}</td>
+              </ng-container>
+
+              <!-- Total Price Column -->
+              <ng-container matColumnDef="totalPrice">
+                <th mat-header-cell *matHeaderCellDef>Total Price</th>
+                <td mat-cell *matCellDef="let item">
+                  <strong>${{ item.totalPrice | number: '1.2-2' }}</strong>
+                </td>
+              </ng-container>
+
+              <!-- Expiry Date Column -->
+              <ng-container matColumnDef="expiryDate">
+                <th mat-header-cell *matHeaderCellDef>Expiry Date</th>
+                <td mat-cell *matCellDef="let item">
+                  {{ item.expiryDate || 'N/A' }}
+                </td>
+              </ng-container>
+
+              <!-- Batch Number Column -->
+              <ng-container matColumnDef="batchNumber">
+                <th mat-header-cell *matHeaderCellDef>Batch Number</th>
+                <td mat-cell *matCellDef="let item">
+                  {{ item.batchNumber || 'N/A' }}
+                </td>
+              </ng-container>
+
+              <!-- Actions Column -->
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef>Actions</th>
+                <td mat-cell *matCellDef="let item">
+                  <button mat-icon-button color="warn" (click)="removeItem(item.id)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="table-row"></tr>
+            </table>
+          </div>
+
+          <!-- Totals Section -->
+          <div class="totals-section">
+            <div class="totals-grid">
+              <div class="total-row">
+                <span class="total-label">Subtotal:</span>
+                <span class="total-value">${{ subtotal | number: '1.2-2' }}</span>
+              </div>
+              <div class="total-row">
+                <span class="total-label">Tax (10%):</span>
+                <span class="total-value">${{ taxAmount | number: '1.2-2' }}</span>
+              </div>
+              <div class="total-row grand-total">
+                <span class="total-label">Grand Total:</span>
+                <span class="total-value">${{ totalAmount | number: '1.2-2' }}</span>
+              </div>
+            </div>
+          </div>
+        } @else {
+          <div class="empty-state">
+            <mat-icon>inventory</mat-icon>
+            <h3>No Items Added Yet</h3>
+            <p>Add supply items using the form above</p>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <button mat-button class="ghost-btn" (click)="clearAll()">
+        <mat-icon>clear_all</mat-icon>
+        Clear All
+      </button>
+      
+      <button mat-stroked-button class="outlined-btn" (click)="openPrintPreview()">
+        <mat-icon>print</mat-icon>
+        Print Report
+      </button>
+      
+      <button mat-raised-button class="gradient-btn" (click)="saveReceipt()"
+              [disabled]="supplyItems.length === 0">
+        <mat-icon>save</mat-icon>
+        Save Receipt
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Print Preview Modal -->
+@if (showPrintModal) {
+  <div class="print-modal-overlay" (click)="closePrintModal()">
+    <div class="print-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header no-print">
+        <h2>
+          <mat-icon>print</mat-icon>
+          Print Preview
+        </h2>
+        <button mat-icon-button (click)="closePrintModal()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <div class="print-content">
+        <!-- Print Header -->
+        <div class="print-header">
+          <div class="company-info">
+            <h1>PowerTrader POS</h1>
+            <p>Inventory Management System</p>
+          </div>
+          <div class="document-info">
+            <h2>SUPPLY RECEIPT</h2>
+            <p><strong>Invoice Ref:</strong> {{ invoiceRef }}</p>
+            <p><strong>Date:</strong> {{ receiveDate | date: 'fullDate' }}</p>
+          </div>
+        </div>
+
+        <!-- Purchase Details -->
+        <div class="print-section">
+          <h3>Purchase Details</h3>
+          <div class="details-grid">
+            <div class="detail-item">
+              <span class="detail-label">Supplier:</span>
+              <span class="detail-value">{{ supplierName }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Warehouse:</span>
+              <span class="detail-value">{{ warehouseName }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Total Items:</span>
+              <span class="detail-value">{{ totalItems }} Units</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Grand Total:</span>
+              <span class="detail-value">${{ totalAmount | number: '1.2-2' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Items Table -->
+        <div class="print-section">
+          <h3>Supply Items</h3>
+          <table class="print-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Product Name</th>
+                <th>SKU</th>
+                <th>Category</th>
+                <th>Quantity</th>
+                <th>Unit Price</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of supplyItems; track item.id; let i = $index) {
+                <tr>
+                  <td>{{ i + 1 }}</td>
+                  <td>{{ item.productName }}</td>
+                  <td>{{ item.sku }}</td>
+                  <td>{{ item.category }}</td>
+                  <td>{{ item.quantity }}</td>
+                  <td>${{ item.unitPrice | number: '1.2-2' }}</td>
+                  <td>${{ item.totalPrice | number: '1.2-2' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Totals -->
+        <div class="print-section">
+          <div class="print-totals">
+            <div class="print-total-row">
+              <span>Subtotal:</span>
+              <span>${{ subtotal | number: '1.2-2' }}</span>
+            </div>
+            <div class="print-total-row">
+              <span>Tax (10%):</span>
+              <span>${{ taxAmount | number: '1.2-2' }}</span>
+            </div>
+            <div class="print-total-row grand">
+              <span>Grand Total:</span>
+              <span>${{ totalAmount | number: '1.2-2' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="print-footer">
+          <p>Generated on {{ receiveDate | date: 'full' }}</p>
+          <p>Authorized by: Inventory Manager</p>
+          <p class="signature-line">_________________________</p>
+          <p>Signature</p>
+        </div>
+      </div>
+
+      <div class="modal-actions no-print">
+        <button mat-button (click)="closePrintModal()">Cancel</button>
+        <button mat-raised-button color="primary" (click)="printReceipt()">
+          <mat-icon>print</mat-icon>
+          Print
+        </button>
+      </div>
+    </div>
+  </div>
+}

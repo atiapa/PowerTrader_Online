@@ -1,0 +1,46 @@
+<mat-toolbar color="primary">
+  <span>Suppliers Dashboard - {{currentUser?.fullName}}</span>
+  <span class="spacer"></span>
+  <button mat-raised-button color="accent" (click)="logout()">Logout</button>
+</mat-toolbar>
+<div class="dashboard-container">
+  <h1>Suppliers Dashboard</h1>
+  <div class="dashboard-grid">
+    <mat-card>
+      <mat-card-header><mat-card-title>Supplier Management</mat-card-title></mat-card-header>
+      <mat-card-content><p>Manage supplier information</p></mat-card-content>
+    </mat-card>
+    <mat-card>
+      <mat-card-header><mat-card-title>Purchase Orders</mat-card-title></mat-card-header>
+      <mat-card-content><p>Create and track POs</p></mat-card-content>
+    </mat-card>
+    <mat-card>
+      <mat-card-header><mat-card-title>Invoices</mat-card-title></mat-card-header>
+      <mat-card-content><p>Process supplier invoices</p></mat-card-content>
+    </mat-card>
+    <mat-card>
+      <mat-card-header><mat-card-title>Payments</mat-card-title></mat-card-header>
+      <mat-card-content><p>Track supplier payments</p></mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Floating Action Button -->
+  <button mat-fab class="fab-add" color="primary" [matMenuTriggerFor]="suppMenu" matTooltip="Quick Actions">
+    <mat-icon>add</mat-icon>
+  </button>
+
+  <mat-menu #suppMenu="matMenu">
+    <button mat-menu-item (click)="addSupplier()">
+      <mat-icon>store</mat-icon>
+      <span>Add Supplier</span>
+    </button>
+    <button mat-menu-item (click)="createPurchaseOrder()">
+      <mat-icon>shopping_bag</mat-icon>
+      <span>Purchase Order</span>
+    </button>
+    <button mat-menu-item (click)="recordPayment()">
+      <mat-icon>payment</mat-icon>
+      <span>Record Payment</span>
+    </button>
+  </mat-menu>
+</div>
