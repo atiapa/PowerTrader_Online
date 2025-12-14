@@ -1,0 +1,26 @@
+<mat-toolbar color="primary">
+  <span>Suppliers Dashboard - {{currentUser?.fullName}}</span>
+  <span class="spacer"></span>
+  <button mat-raised-button color="accent" (click)="logout()">Logout</button>
+</mat-toolbar>
+<div class="dashboard-container">
+  <h1>Suppliers Dashboard</h1>
+  <div class="dashboard-grid">
+    <mat-card>
+      <mat-card-header><mat-card-title>Supplier Management</mat-card-title></mat-card-header>
+      <mat-card-content><p>Manage supplier information</p></mat-card-content>
+    </mat-card>
+    <mat-card>
+      <mat-card-header><mat-card-title>Purchase Orders</mat-card-title></mat-card-header>
+      <mat-card-content><p>Create and track POs</p></mat-card-content>
+    </mat-card>
+    <mat-card>
+      <mat-card-header><mat-card-title>Invoices</mat-card-title></mat-card-header>
+      <mat-card-content><p>Process supplier invoices</p></mat-card-content>
+    </mat-card>
+    <mat-card>
+      <mat-card-header><mat-card-title>Payments</mat-card-title></mat-card-header>
+      <mat-card-content><p>Track supplier payments</p></mat-card-content>
+    </mat-card>
+  </div>
+</div>

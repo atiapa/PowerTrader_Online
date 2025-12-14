@@ -1,0 +1,814 @@
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { MatIconModule } from '@angular/material/icon';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatBadgeModule } from '@angular/material/badge';
+import { MatDialogModule, MatDialog } from '@angular/material/dialog';
+import { MatGridListModule } from '@angular/material/grid-list';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatDividerModule } from '@angular/material/divider';
+import { ApiService } from '../../services/api.service';
+import { AuthService } from '../../services/auth.service';
+import { Product, SaleItem, CreateSaleRequest } from '../../models/models';
+
+interface Category {
+  id: number;
+  name: string;
+}
+
+interface DiscountType {
+  id: string;
+  name: string;
+  icon: string;
+}
+
+interface PaymentSplit {
+  method: string;
+  amount: number;
+}
+
+interface Receipt {
+  transactionNumber: string;
+  date: Date;
+  items: SaleItem[];
+  subtotal: number;
+  tax: number;
+  discount: number;
+  total: number;
+  paymentMethod: string;
+  customerName?: string;
+  customerPhone?: string;
+  cashReceived?: number;
+  change?: number;
+}
+
+@Component({
+  selector: 'app-retail-sales-point',
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatCardModule,
+    MatButtonModule,
+    MatInputModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatIconModule,
+    MatSnackBarModule,
+    MatToolbarModule,
+    MatBadgeModule,
+    MatDialogModule,
+    MatGridListModule,
+    MatChipsModule,
+    MatCheckboxModule,
+    MatRadioModule,
+    MatDividerModule
+  ],
+  templateUrl: './retail-sales-point.component.html',
+  styleUrl: './retail-sales-point.component.scss'
+})
+export class RetailSalesPointComponent implements OnInit {
+  // Product and Category Management
+  allProducts: Product[] = [];
+  filteredProducts: Product[] = [];
+  categories: Category[] = [
+    { id: 1, name: 'All Products' },
+    { id: 2, name: 'Electronics' },
+    { id: 3, name: 'Groceries' },
+    { id: 4, name: 'Clothing' },
+    { id: 5, name: 'Home & Garden' },
+    { id: 6, name: 'Sports' }
+  ];
+  selectedCategoryId: number = 1;
+  
+  // Cart Management
+  cartItems: SaleItem[] = [];
+  selectedCartItems: Set<number> = new Set();
+  
+  // Search and Input
+  searchTerm: string = '';
+  barcodeInput: string = '';
+  
+  // Payment
+  paymentMethod: string = 'Cash';
+  paymentMethods = ['Cash', 'Card', 'Mobile Money', 'Bank Transfer', 'Gift Card'];
+  
+  // Split Payment
+  useSplitPayment: boolean = false;
+  paymentSplits: PaymentSplit[] = [];
+  currentSplitMethod: string = 'Cash';
+  currentSplitAmount: number = 0;
+  
+  // Cash Payment
+  cashReceived: number = 0;
+  showCashCalculator: boolean = false;
+  
+  // Customer Info
+  customerName: string = '';
+  customerPhone: string = '';
+  customerEmail: string = '';
+  customerLoyaltyPoints: number = 0;
+  
+  // Discount Management
+  discountTypes: DiscountType[] = [
+    { id: 'manual', name: 'Manual Discount', icon: 'percent' },
+    { id: 'promotional', name: 'Promotional', icon: 'local_offer' },
+    { id: 'clearance', name: 'Clearance Sale', icon: 'sell' },
+    { id: 'loyalty', name: 'Loyalty Points', icon: 'stars' }
+  ];
+  showDiscountPanel: boolean = false;
+  selectedDiscountType: string = 'manual';
+  discountValue: number = 0;
+  discountPercentage: number = 0;
+  applyDiscountToAll: boolean = true;
+  
+  // Promotional and Clearance (Auto-applied)
+  promotionalDiscountRate: number = 0; // Set from backend
+  clearanceDiscountRate: number = 0; // Set from product management
+  
+  // Loyalty Points
+  usePointsAsDiscount: boolean = false;
+  loyaltyPointsToRedeem: number = 0;
+  pointsConversionRate: number = 0.01; // $1 per 100 points
+  
+  // Hold Orders
+  heldOrders: any[] = [];
+  showHeldOrdersPanel: boolean = false;
+  
+  // Gift Card
+  giftCardNumber: string = '';
+  giftCardBalance: number = 0;
+  giftCardAmountToUse: number = 0;
+  isValidatingGiftCard: boolean = false;
+  
+  // Returns
+  showReturnsPanel: boolean = false;
+  
+  // UI State
+  isLoading: boolean = false;
+  showCheckout: boolean = false;
+  showReceipt: boolean = false;
+  currentReceipt: Receipt | null = null;
+  
+  // Numeric Keypad
+  quantity: number = 1;
+  
+  constructor(
+    private apiService: ApiService,
+    private authService: AuthService,
+    private snackBar: MatSnackBar,
+    private dialog: MatDialog
+  ) { }
+
+  ngOnInit(): void {
+    this.loadProducts();
+    this.loadCustomerLoyaltyPoints();
+    this.checkPromotionalPeriod();
+  }
+
+  loadProducts(): void {
+    this.isLoading = true;
+    this.apiService.getProducts().subscribe({
+      next: (products) => {
+        this.allProducts = products;
+        this.applyAutomaticDiscounts();
+        this.filterProducts();
+        this.isLoading = false;
+      },
+      error: (error) => {
+        this.snackBar.open('Error loading products', 'Close', { duration: 3000 });
+        this.isLoading = false;
+      }
+    });
+  }
+
+  loadCustomerLoyaltyPoints(): void {
+    // In real implementation, load from API based on customer phone/email
+    // For now, simulate with dummy data
+    this.customerLoyaltyPoints = 500; // Example: 500 points
+  }
+
+  checkPromotionalPeriod(): void {
+    // Check if current date is within promotional period
+    // This would typically come from backend configuration
+    const now = new Date();
+    // Example: Promotional discount of 10% during holiday season
+    this.promotionalDiscountRate = 0.10; // 10% off
+  }
+
+  applyAutomaticDiscounts(): void {
+    // Apply clearance discounts from product management
+    this.allProducts.forEach(product => {
+      // In real implementation, check if product has clearance flag
+      // For demo, assume some products have clearance
+      if (product.code?.startsWith('CL')) {
+        this.clearanceDiscountRate = 0.15; // 15% clearance discount
+      }
+    });
+  }
+
+  filterProducts(): void {
+    let products = this.allProducts;
+    
+    // Filter by category
+    if (this.selectedCategoryId !== 1) {
+      // In a real implementation, filter by actual category
+      products = products;
+    }
+    
+    // Filter by search term
+    if (this.searchTerm) {
+      const term = this.searchTerm.toLowerCase();
+      products = products.filter(p => 
+        p.name.toLowerCase().includes(term) ||
+        p.code?.toLowerCase().includes(term)
+      );
+    }
+    
+    this.filteredProducts = products;
+  }
+
+  onCategoryChange(categoryId: number): void {
+    this.selectedCategoryId = categoryId;
+    this.filterProducts();
+  }
+
+  onSearchChange(): void {
+    this.filterProducts();
+  }
+
+  onBarcodeSearch(): void {
+    if (!this.barcodeInput.trim()) {
+      return;
+    }
+    
+    this.apiService.getProductByCode(this.barcodeInput).subscribe({
+      next: (product) => {
+        this.addProductToCart(product);
+        this.barcodeInput = '';
+      },
+      error: (error) => {
+        this.snackBar.open('Product not found', 'Close', { duration: 3000 });
+        this.barcodeInput = '';
+      }
+    });
+  }
+
+  addProductToCart(product: Product): void {
+    const existingItem = this.cartItems.find(item => item.productCode === product.code);
+    
+    if (existingItem) {
+      existingItem.quantity += this.quantity;
+      this.recalculateItemTotal(existingItem);
+    } else {
+      const newItem: SaleItem = {
+        productName: product.name,
+        productCode: product.code,
+        quantity: this.quantity,
+        unitPrice: product.price,
+        totalPrice: product.price * this.quantity,
+        discountAmount: 0,
+        netPrice: product.price * this.quantity
+      };
+      this.cartItems.push(newItem);
+      this.recalculateItemTotal(newItem);
+    }
+    
+    this.quantity = 1;
+    this.showFeedback('Product added to cart');
+  }
+
+  recalculateItemTotal(item: SaleItem): void {
+    item.totalPrice = item.quantity * item.unitPrice;
+    
+    // Apply automatic discounts
+    let discount = 0;
+    
+    // Promotional discount
+    if (this.promotionalDiscountRate > 0) {
+      discount += item.totalPrice * this.promotionalDiscountRate;
+    }
+    
+    // Clearance discount (check if product code starts with CL)
+    if (item.productCode?.startsWith('CL') && this.clearanceDiscountRate > 0) {
+      discount += item.totalPrice * this.clearanceDiscountRate;
+    }
+    
+    item.discountAmount = discount;
+    item.netPrice = item.totalPrice - discount;
+  }
+
+  updateQuantity(item: SaleItem, change: number): void {
+    item.quantity += change;
+    if (item.quantity < 1) {
+      item.quantity = 1;
+    }
+    this.recalculateItemTotal(item);
+  }
+
+  toggleCartItemSelection(index: number): void {
+    if (this.selectedCartItems.has(index)) {
+      this.selectedCartItems.delete(index);
+    } else {
+      this.selectedCartItems.add(index);
+    }
+  }
+
+  removeFromCart(item: SaleItem): void {
+    const index = this.cartItems.indexOf(item);
+    if (index > -1) {
+      this.cartItems.splice(index, 1);
+      this.selectedCartItems.delete(index);
+      this.showFeedback('Item removed from cart');
+    }
+  }
+
+  clearCart(): void {
+    if (this.cartItems.length > 0) {
+      if (confirm('Are you sure you want to clear the cart?')) {
+        this.cartItems = [];
+        this.selectedCartItems.clear();
+        this.resetDiscounts();
+        this.showFeedback('Cart cleared');
+      }
+    }
+  }
+
+  // Discount Functions
+  toggleDiscountPanel(): void {
+    this.showDiscountPanel = !this.showDiscountPanel;
+  }
+
+  applyManualDiscount(): void {
+    if (this.applyDiscountToAll) {
+      // Apply to all items
+      this.cartItems.forEach(item => {
+        const additionalDiscount = this.discountPercentage > 0 
+          ? item.totalPrice * (this.discountPercentage / 100)
+          : this.discountValue;
+        item.discountAmount += additionalDiscount;
+        item.netPrice = item.totalPrice - item.discountAmount;
+      });
+    } else {
+      // Apply to selected items only
+      this.cartItems.forEach((item, index) => {
+        if (this.selectedCartItems.has(index)) {
+          const additionalDiscount = this.discountPercentage > 0 
+            ? item.totalPrice * (this.discountPercentage / 100)
+            : this.discountValue;
+          item.discountAmount += additionalDiscount;
+          item.netPrice = item.totalPrice - item.discountAmount;
+        }
+      });
+    }
+    this.showFeedback('Discount applied');
+    this.showDiscountPanel = false;
+  }
+
+  applyLoyaltyDiscount(): void {
+    if (this.loyaltyPointsToRedeem > this.customerLoyaltyPoints) {
+      this.snackBar.open('Insufficient loyalty points', 'Close', { duration: 3000 });
+      return;
+    }
+    
+    const discountAmount = this.loyaltyPointsToRedeem * this.pointsConversionRate;
+    const totalAmount = this.getSubtotal();
+    
+    if (discountAmount > totalAmount) {
+      this.snackBar.open('Discount exceeds total amount', 'Close', { duration: 3000 });
+      return;
+    }
+    
+    // Distribute discount proportionally across items
+    const discountRatio = discountAmount / totalAmount;
+    this.cartItems.forEach(item => {
+      const itemDiscount = item.totalPrice * discountRatio;
+      item.discountAmount += itemDiscount;
+      item.netPrice = item.totalPrice - item.discountAmount;
+    });
+    
+    this.usePointsAsDiscount = true;
+    this.showFeedback(`Applied ${this.loyaltyPointsToRedeem} loyalty points as discount`);
+    this.showDiscountPanel = false;
+  }
+
+  resetDiscounts(): void {
+    this.cartItems.forEach(item => {
+      item.discountAmount = 0;
+      this.recalculateItemTotal(item);
+    });
+    this.discountValue = 0;
+    this.discountPercentage = 0;
+    this.loyaltyPointsToRedeem = 0;
+    this.usePointsAsDiscount = false;
+  }
+
+  // Numeric Keypad Functions
+  setQuantity(value: number): void {
+    this.quantity = value;
+  }
+
+  // Calculation Functions
+  getSubtotal(): number {
+    return this.cartItems.reduce((sum, item) => sum + item.totalPrice, 0);
+  }
+
+  getTotalDiscount(): number {
+    return this.cartItems.reduce((sum, item) => sum + item.discountAmount, 0);
+  }
+
+  getSubtotalAfterDiscount(): number {
+    return this.getSubtotal() - this.getTotalDiscount();
+  }
+
+  getTax(): number {
+    return this.getSubtotalAfterDiscount() * 0.1; // 10% tax
+  }
+
+  getTotal(): number {
+    return this.getSubtotalAfterDiscount() + this.getTax();
+  }
+
+  getChange(): number {
+    if (this.cashReceived > 0) {
+      return Math.max(0, this.cashReceived - this.getTotal());
+    }
+    return 0;
+  }
+
+  getCartItemCount(): number {
+    return this.cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  }
+
+  getTotalSplitPayments(): number {
+    return this.paymentSplits.reduce((sum, split) => sum + split.amount, 0);
+  }
+
+  getRemainingAmount(): number {
+    return Math.max(0, this.getTotal() - this.getTotalSplitPayments());
+  }
+
+  // Split Payment Functions
+  addPaymentSplit(): void {
+    if (this.currentSplitAmount <= 0) {
+      this.snackBar.open('Enter a valid amount', 'Close', { duration: 3000 });
+      return;
+    }
+    
+    if (this.getTotalSplitPayments() + this.currentSplitAmount > this.getTotal()) {
+      this.snackBar.open('Amount exceeds total', 'Close', { duration: 3000 });
+      return;
+    }
+    
+    this.paymentSplits.push({
+      method: this.currentSplitMethod,
+      amount: this.currentSplitAmount
+    });
+    
+    this.currentSplitAmount = 0;
+    this.showFeedback('Payment split added');
+  }
+
+  removePaymentSplit(index: number): void {
+    this.paymentSplits.splice(index, 1);
+  }
+
+  // Cash Calculator
+  addCashAmount(amount: number): void {
+    this.cashReceived += amount;
+  }
+
+  clearCashAmount(): void {
+    this.cashReceived = 0;
+  }
+
+  // Checkout Functions
+  openCheckout(): void {
+    if (this.cartItems.length === 0) {
+      this.snackBar.open('Cart is empty', 'Close', { duration: 3000 });
+      return;
+    }
+    this.showCheckout = true;
+    this.showCashCalculator = this.paymentMethod === 'Cash';
+  }
+
+  closeCheckout(): void {
+    this.showCheckout = false;
+    this.showCashCalculator = false;
+  }
+
+  onPaymentMethodChange(): void {
+    // Handle different payment method selections
+    if (this.paymentMethod === 'Gift Card') {
+      this.showCashCalculator = false;
+    } else if (this.paymentMethod === 'Cash') {
+      this.showCashCalculator = true;
+    } else {
+      this.showCashCalculator = false;
+      this.cashReceived = 0;
+    }
+  }
+
+  completeSale(): void {
+    if (this.cartItems.length === 0) {
+      this.snackBar.open('Cart is empty', 'Close', { duration: 3000 });
+      return;
+    }
+
+    // Validate payment
+    if (this.useSplitPayment) {
+      if (this.getRemainingAmount() > 0) {
+        this.snackBar.open('Payment incomplete. Add remaining splits.', 'Close', { duration: 3000 });
+        return;
+      }
+    } else {
+      if (!this.paymentMethod) {
+        this.snackBar.open('Select payment method', 'Close', { duration: 3000 });
+        return;
+      }
+      
+      if (this.paymentMethod === 'Cash' && this.cashReceived < this.getTotal()) {
+        this.snackBar.open('Insufficient cash received', 'Close', { duration: 3000 });
+        return;
+      }
+    }
+
+    this.isLoading = true;
+    const subtotal = this.getSubtotal();
+    const tax = this.getTax();
+    const total = this.getTotal();
+    const discount = this.getTotalDiscount();
+
+    const saleRequest: any = {
+      totalAmount: subtotal,
+      taxAmount: tax,
+      discountAmount: discount,
+      netAmount: total,
+      paymentMethod: this.useSplitPayment ? 'Split Payment' : this.paymentMethod,
+      customerName: this.customerName || undefined,
+      customerPhone: this.customerPhone || undefined,
+      customerEmail: this.customerEmail || undefined,
+      items: this.cartItems,
+      store: 'Retail', // Required: Mark as Retail store
+      updateInventory: true, // Reduce UnitInstock in Retail_Items
+      postToLedger: true, // Post double-entry to Accounts_Ledger
+      saveToDetailsTemp: true, // Save to Sales_Details_Temp
+      paymentSplits: this.useSplitPayment ? this.paymentSplits : undefined,
+      cashReceived: this.paymentMethod === 'Cash' ? this.cashReceived : undefined,
+      change: this.paymentMethod === 'Cash' ? this.getChange() : undefined
+    };
+
+    // Use retail sales API endpoint for complete integration
+    this.apiService.post('/api/retailsales/complete-sale', saleRequest).subscribe({
+      next: (sale) => {
+        // Create receipt
+        this.currentReceipt = {
+          transactionNumber: sale.transactionNumber || 'TXN' + Date.now(),
+          date: new Date(),
+          items: [...this.cartItems],
+          subtotal: subtotal,
+          tax: tax,
+          discount: discount,
+          total: total,
+          paymentMethod: this.useSplitPayment ? 'Split Payment' : this.paymentMethod,
+          customerName: this.customerName,
+          customerPhone: this.customerPhone,
+          cashReceived: this.paymentMethod === 'Cash' ? this.cashReceived : undefined,
+          change: this.paymentMethod === 'Cash' ? this.getChange() : undefined
+        };
+        
+        this.showCheckout = false;
+        this.showReceipt = true;
+        this.isLoading = false;
+        
+        this.showFeedback('Sale completed successfully!');
+      },
+      error: (error) => {
+        this.snackBar.open('Error completing sale', 'Close', { duration: 3000 });
+        this.isLoading = false;
+      }
+    });
+  }
+
+  // Receipt Functions
+  printReceipt(): void {
+    window.print();
+    this.showFeedback('Printing receipt...');
+  }
+
+  emailReceipt(): void {
+    if (!this.customerEmail && !this.currentReceipt?.customerName) {
+      this.snackBar.open('Enter customer email', 'Close', { duration: 3000 });
+      return;
+    }
+    
+    // In real implementation, call API to send email
+    this.showFeedback('Receipt sent via email');
+  }
+
+  smsReceipt(): void {
+    if (!this.customerPhone && !this.currentReceipt?.customerPhone) {
+      this.snackBar.open('Enter customer phone', 'Close', { duration: 3000 });
+      return;
+    }
+    
+    // In real implementation, call API to send SMS
+    this.showFeedback('Receipt confirmation sent via SMS');
+  }
+
+  closeReceipt(): void {
+    this.showReceipt = false;
+    this.resetSale();
+  }
+
+  // ===== HOLD ORDERS FUNCTIONALITY =====
+  async holdCurrentOrder(): Promise<void> {
+    if (this.cartItems.length === 0) {
+      this.snackBar.open('Cart is empty', 'Close', { duration: 3000 });
+      return;
+    }
+
+    this.isLoading = true;
+    const holdRequest = {
+      customerId: this.customerPhone || '',
+      customerName: this.customerName || 'Walk-in Customer',
+      totalAmount: this.getTotal(),
+      items: JSON.stringify(this.cartItems),
+      expiryHours: 24,
+      notes: `Held at ${new Date().toLocaleString()}`
+    };
+
+    this.apiService.post('/api/retailsales/hold-order', holdRequest).subscribe({
+      next: (response: any) => {
+        this.showFeedback(`Order held successfully. Reference: ${response.referenceNumber}`);
+        this.resetSale();
+        this.isLoading = false;
+      },
+      error: (error) => {
+        this.snackBar.open('Error holding order', 'Close', { duration: 3000 });
+        this.isLoading = false;
+      }
+    });
+  }
+
+  async loadHeldOrders(): Promise<void> {
+    this.isLoading = true;
+    this.apiService.get('/api/retailsales/pending-sales/cashier').subscribe({
+      next: (orders: any[]) => {
+        this.heldOrders = orders;
+        this.showHeldOrdersPanel = true;
+        this.isLoading = false;
+      },
+      error: (error) => {
+        this.snackBar.open('Error loading held orders', 'Close', { duration: 3000 });
+        this.isLoading = false;
+      }
+    });
+  }
+
+  async retrieveHeldOrder(orderId: number): Promise<void> {
+    this.isLoading = true;
+    this.apiService.post(`/api/retailsales/retrieve-pending/${orderId}`, {}).subscribe({
+      next: (order: any) => {
+        // Restore cart from held order
+        this.cartItems = JSON.parse(order.items);
+        this.customerName = order.customerName;
+        this.customerPhone = order.customerId;
+        this.showHeldOrdersPanel = false;
+        this.showFeedback('Order retrieved successfully');
+        this.isLoading = false;
+      },
+      error: (error) => {
+        this.snackBar.open('Error retrieving order', 'Close', { duration: 3000 });
+        this.isLoading = false;
+      }
+    });
+  }
+
+  async cancelHeldOrder(orderId: number): Promise<void> {
+    this.isLoading = true;
+    this.apiService.delete(`/api/retailsales/cancel-pending/${orderId}`).subscribe({
+      next: () => {
+        this.showFeedback('Order cancelled');
+        this.loadHeldOrders(); // Refresh list
+        this.isLoading = false;
+      },
+      error: (error) => {
+        this.snackBar.open('Error cancelling order', 'Close', { duration: 3000 });
+        this.isLoading = false;
+      }
+    });
+  }
+
+  toggleHeldOrdersPanel(): void {
+    if (!this.showHeldOrdersPanel) {
+      this.loadHeldOrders();
+    } else {
+      this.showHeldOrdersPanel = false;
+    }
+  }
+
+  // ===== GIFT CARD FUNCTIONALITY =====
+  async validateGiftCard(): Promise<void> {
+    if (!this.giftCardNumber.trim()) {
+      this.snackBar.open('Enter gift card number', 'Close', { duration: 3000 });
+      return;
+    }
+
+    this.isValidatingGiftCard = true;
+    this.apiService.get(`/api/giftcards/${this.giftCardNumber}/balance`).subscribe({
+      next: (response: any) => {
+        this.giftCardBalance = response.balance || response;
+        this.showFeedback(`Gift Card Balance: $${this.giftCardBalance.toFixed(2)}`);
+        this.isValidatingGiftCard = false;
+      },
+      error: (error) => {
+        this.snackBar.open('Invalid gift card', 'Close', { duration: 3000 });
+        this.giftCardBalance = 0;
+        this.isValidatingGiftCard = false;
+      }
+    });
+  }
+
+  async applyGiftCardPayment(): Promise<void> {
+    if (this.giftCardAmountToUse <= 0 || this.giftCardAmountToUse > this.giftCardBalance) {
+      this.snackBar.open('Invalid gift card amount', 'Close', { duration: 3000 });
+      return;
+    }
+
+    if (this.giftCardAmountToUse > this.getTotal()) {
+      this.snackBar.open('Amount exceeds total', 'Close', { duration: 3000 });
+      return;
+    }
+
+    const redeemRequest = {
+      cardNumber: this.giftCardNumber,
+      amount: this.giftCardAmountToUse
+    };
+
+    this.apiService.post('/api/giftcards/redeem', redeemRequest).subscribe({
+      next: () => {
+        // Add to split payments
+        if (!this.useSplitPayment) {
+          this.useSplitPayment = true;
+        }
+        this.paymentSplits.push({
+          method: 'Gift Card',
+          amount: this.giftCardAmountToUse
+        });
+        this.giftCardBalance -= this.giftCardAmountToUse;
+        this.showFeedback(`Gift card payment of $${this.giftCardAmountToUse.toFixed(2)} applied`);
+        this.giftCardAmountToUse = 0;
+      },
+      error: (error) => {
+        this.snackBar.open('Error processing gift card', 'Close', { duration: 3000 });
+      }
+    });
+  }
+
+  // ===== RETURNS FUNCTIONALITY =====
+  toggleReturnsPanel(): void {
+    this.showReturnsPanel = !this.showReturnsPanel;
+    // In a complete implementation, this would show a returns processing UI
+    this.snackBar.open('Returns feature available - enter invoice number to process return', 'Close', { duration: 5000 });
+  }
+
+  resetSale(): void {
+    this.cartItems = [];
+    this.selectedCartItems.clear();
+    this.customerName = '';
+    this.customerPhone = '';
+    this.customerEmail = '';
+    this.paymentMethod = 'Cash';
+    this.cashReceived = 0;
+    this.useSplitPayment = false;
+    this.paymentSplits = [];
+    this.currentReceipt = null;
+    this.giftCardNumber = '';
+    this.giftCardBalance = 0;
+    this.giftCardAmountToUse = 0;
+    this.resetDiscounts();
+  }
+
+  // Utility Functions
+  showFeedback(message: string): void {
+    this.snackBar.open(message, '', { duration: 1500 });
+  }
+
+  logout(): void {
+    this.authService.logout();
+  }
+
+  get currentUser() {
+    return this.authService.currentUserValue;
+  }
+}
